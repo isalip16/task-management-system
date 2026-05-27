@@ -21,7 +21,7 @@ import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { UserDocument } from "../users/schemas/user.schema";
 
 @Controller("projects")
-@UseGuards(JwtAuthGuard, RolesGuard) // All project routes require authentication
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 

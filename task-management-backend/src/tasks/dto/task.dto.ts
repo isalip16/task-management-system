@@ -48,10 +48,6 @@ export class UpdateTaskDto {
   description?: string;
 
   @IsOptional()
-  @IsEnum(TaskStatus)
-  status?: TaskStatus;
-
-  @IsOptional()
   @IsEnum(TaskPriority)
   priority?: TaskPriority;
 

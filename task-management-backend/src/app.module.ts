@@ -19,7 +19,7 @@ import { ActivityLogsModule } from "./activity-logs/activity-logs.module";
     }),
     AuthModule,
     UsersModule,
-    ActivityLogsModule, // ← before TasksModule, because Tasks depends on it
+    ActivityLogsModule,
     ProjectsModule,
     TasksModule,
   ],

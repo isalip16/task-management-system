@@ -7,7 +7,7 @@ import { TransformInterceptor } from "./common/interceptors/transform.intercepto
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix("api"); // all routes: /api/auth, /api/projects, etc.
+  app.setGlobalPrefix("api");
 
   app.useGlobalPipes(
     new ValidationPipe({

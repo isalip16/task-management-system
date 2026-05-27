@@ -20,18 +20,15 @@ export class UpdateUserDto {
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  // Find all active users (admins only)
   async findAll(query: { search?: string; page?: string; limit?: string }) {
     const { search, page = "1", limit = "10" } = query;
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
     const skip = (pageNum - 1) * limitNum;
 
-    // Build the filter object dynamically based on what was provided
     const filter: QueryFilter<UserDocument> = { isDeleted: false };
 
     if (search) {
-      // $regex with $options: 'i' does a case-insensitive search
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },

@@ -15,7 +15,6 @@ import { Roles } from "../common/decorators/roles.decorator";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { UserRole, UserDocument } from "./schemas/user.schema";
 
-// @UseGuards on the controller level applies to ALL routes inside
 @Controller("users")
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
