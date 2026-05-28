@@ -1,15 +1,14 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { Dashboard } from './dashboard/dashboard';
+import { DashboardRoutingModule } from './dashboard-routing-module';
+import { Dashboard } from './dashboard'; // ← fixed path
 
-const routes: Routes = [
-  { path: '', component: Dashboard }
-];
-
+// DashboardModule is the lazy-loaded entry point.
+// Routes are defined in DashboardRoutingModule — not here.
+// Dashboard is a standalone component so it's imported directly.
 @NgModule({
   imports: [
-    RouterModule.forChild(routes),
-    Dashboard  // standalone component — import directly
+    DashboardRoutingModule, // ← handles routing
+    Dashboard               // ← registers the standalone component
   ]
 })
-export class DashboardModule { }
+export class DashboardModule {}
