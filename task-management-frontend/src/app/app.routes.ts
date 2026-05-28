@@ -4,29 +4,38 @@ import { AuthGuard } from '@core/guards/auth-guard';
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
 
-  // Lazy-loaded modules — Angular only downloads these when the user navigates here
+  // Public routes — no navbar, no guard
   {
     path: 'auth',
     loadChildren: () =>
       import('@features/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
+
+  // Protected routes — all wrapped inside LayoutComponent (navbar lives here)
+  // AuthGuard only needs to be here once — it covers all children
   {
-    path: 'dashboard',
-    canActivate: [AuthGuard], 
-    loadChildren: () =>
-      import('@features/dashboard/dashboard-module').then(m => m.DashboardModule)
-  },
-  {
-    path: 'projects',
+    path: '',
+    loadComponent: () =>
+      import('./layout/layout').then(m => m.LayoutComponent),
     canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('@features/projects/projects-module').then(m => m.ProjectsModule)
+    children: [
+      {
+        path: 'dashboard',
+        loadChildren: () =>
+          import('@features/dashboard/dashboard-module').then(m => m.DashboardModule)
+      },
+      {
+        path: 'projects',
+        loadChildren: () =>
+          import('@features/projects/projects-module').then(m => m.ProjectsModule)
+      },
+      {
+        path: 'tasks',
+        loadChildren: () =>
+          import('@features/tasks/tasks-module').then(m => m.TasksModule)
+      },
+    ]
   },
-  {
-    path: 'tasks',
-    canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('@features/tasks/tasks-module').then(m => m.TasksModule)
-  },
-  { path: '**', redirectTo: '/dashboard' } // fallback for unknown routes
+
+  { path: '**', redirectTo: '/dashboard' }
 ];
