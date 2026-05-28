@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
-import { Project, ApiResponse } from '@core/models';
+import { Project, ApiResponse, DashboardStats } from '@core/models';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectsService {
@@ -41,8 +41,8 @@ export class ProjectsService {
     return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`);
   }
 
-  getDashboardStats(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/dashboard`);
+  getDashboardStats(): Observable<ApiResponse<DashboardStats>> {
+    return this.http.get<ApiResponse<DashboardStats>>(`${this.apiUrl}/dashboard`);
   }
 
   addMember(projectId: string, userId: string): Observable<ApiResponse<any>> {
