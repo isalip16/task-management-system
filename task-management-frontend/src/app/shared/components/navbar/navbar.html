@@ -1,52 +1,58 @@
 <nav class="navbar">
-    <div class="navbar-container">
-        <a class="navbar-brand" routerLink="/dashboard">
-            <span class="brand-icon">+</span>
-            Task Flow
-        </a>
+  <div class="navbar-container">
+    <a class="navbar-brand" routerLink="/dashboard">
+      <span class="brand-icon">❖</span>
+      <span class="brand-text">TaskFlow</span>
+    </a>
 
-        <ul class="nav-links">
-            <li>
-                <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <a routerLink="/projects" routerLinkActive="active">
-                    Projects
-                </a>
-            </li>
-            <li>
-                <a routerLink="/tasks" routerLinkActive="active">
-                    Tasks
-                </a>
-            </li>
-        </ul>
+    <div class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Dashboard
+      </a>
+      <a routerLink="/projects" routerLinkActive="active">
+        Projects
+      </a>
+    </div>
 
-        <div class="navbar-right">
-            <span class="user-greeting">Hello, {{ firstName }}</span>
-            <button class="btn-logout" (click)="logout()">Logout</button>
+    <div class="navbar-right" *ngIf="currentUser">
+      <span class="user-greeting">Hello, {{ firstName }}</span>
+      
+      <div class="user-dropdown-wrapper">
+        <button class="btn-user-dropdown" (click)="toggleUserDropdown()">
+          <span class="avatar-initial">{{ currentUser.name.charAt(0).toUpperCase() }}</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
 
-            <button class="hamburger" (click)="toggleMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+        <div class="user-dropdown-menu" *ngIf="userDropdownOpen">
+          <div class="dropdown-user-info">
+            <span class="menu-user-name">{{ currentUser.name }}</span>
+            <span class="menu-user-email">{{ currentUser.email }}</span>
+          </div>
+          <div class="divider"></div>
+          <button class="dropdown-item" (click)="logout(); userDropdownOpen = false">
+            Logout
+          </button>
         </div>
-    </div>
+      </div>
 
-    @if (menuOpen){
-    <div class="mobile-menu">
-        <a routerLink="/dashboard" routerLinkActive="active" (click)="menuOpen = false">
-            Dashboard
-        </a>
-        <a routerLink="/projects" routerLinkActive="active" (click)="menuOpen = false">
-            Projects
-        </a>
-        <a routerLink="/tasks" routerLinkActive="active" (click)="menuOpen = false">
-            Tasks
-        </a>
-        <button class="btn-logout-mobile" (click)="logout()">Logout</button>
+      <button class="hamburger-btn" (click)="toggleMenu()">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
     </div>
-    }
+  </div>
 </nav>
+
+<div class="mobile-nav-menu" *ngIf="menuOpen">
+  <a routerLink="/dashboard" routerLinkActive="active" (click)="menuOpen = false" [routerLinkActiveOptions]="{ exact: true }">
+    Dashboard
+  </a>
+  <a routerLink="/projects" routerLinkActive="active" (click)="menuOpen = false">
+    Projects
+  </a>
+  <div class="mobile-divider"></div>
+  <button (click)="logout(); menuOpen = false" class="btn-logout-mobile">
+    Logout
+  </button>
+</div>

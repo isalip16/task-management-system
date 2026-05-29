@@ -1,11 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink
+  ],
   templateUrl: './login.html',
   styleUrl: '../auth.scss',
 })
@@ -21,17 +27,17 @@ export class Login implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loginForm = this.fb.group ({
+    this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-    })
+    });
   }
 
-  get f(){
+  get f() {
     return this.loginForm.controls;
   }
 
-  onSubmit(){
+  onSubmit() {
     if (this.loginForm.invalid) {
       return;
     }
@@ -47,6 +53,6 @@ export class Login implements OnInit {
         this.errorMessage = err.error?.message || 'Login failed. Please try again.';
         this.isLoading = false;
       }
-    })
+    });
   }
 }
