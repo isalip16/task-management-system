@@ -1,1 +1,131 @@
-<p>project-list works!</p>
+<div class="project-list-container">
+  
+  <!-- Shared Page Header -->
+  <app-page-header 
+    title="Projects" 
+    [subtitle]="totalProjects + ' project' + (totalProjects !== 1 ? 's' : '') + ' total'">
+    <a routerLink="/projects/new" class="btn-primary">
+      New Project
+    </a>
+  </app-page-header>
+
+  <!-- Search and Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group search-field">
+      <input type="text" placeholder="Search projects by name..." [(ngModel)]="searchTerm" (input)="onSearch()" class="search-input" />
+    </div>
+
+    <div class="filter-group filter-field">
+      <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="archived">Archived</option>
+      </select>
+    </div>
+
+    @if (hasFilters) {
+      <button (click)="clearFilters()" class="btn-secondary btn-clear">
+        Clear
+      </button>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <app-skeleton-loader type="card" [count]="6"></app-skeleton-loader>
+  }
+
+  <!-- Error State -->
+  @if (errorMessage && !isLoading) {
+    <div class="alert-error">
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <!-- Projects Grid -->
+  @if (!isLoading && !errorMessage) {
+    @if (projects.length > 0) {
+      <div class="projects-grid">
+        @for (project of projects; track project._id) {
+          <div class="project-card">
+            
+            <div class="card-header">
+              <div class="project-avatar-wrapper">
+                <div class="project-avatar">{{ getInitial(project.name) }}</div>
+              </div>
+              <div class="card-header-meta">
+                <span class="status-badge" [class]="'status-' + project.status">
+                  {{ getStatusLabel(project.status) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <h3 class="project-name">{{ project.name }}</h3>
+              <p class="project-desc">
+                {{ project.description || 'No description provided.' }}
+              </p>
+
+              <div class="divider"></div>
+
+              <div class="project-meta-info">
+                <div class="meta-item">
+                  <span class="meta-icon">👤</span>
+                  <span>{{ project.members.length }} member{{ project.members.length !== 1 ? 's' : '' }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-icon">📅</span>
+                  <span>{{ project.createdAt | date: 'MMM d, y' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <a [routerLink]="['/projects', project._id]" class="btn-primary btn-action">
+                View
+              </a>
+              <a [routerLink]="['/projects', project._id, 'edit']" class="btn-secondary btn-action">
+                Edit
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination-container">
+          <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" class="btn-pagination">
+            ◀
+          </button>
+          <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+          <button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" class="btn-pagination">
+            ▶
+          </button>
+        </div>
+      }
+
+    } @else {
+      <!-- Empty State -->
+      <div class="empty-state-card">
+        <div class="empty-state-content">
+          <div class="empty-icon-wrapper">🔍</div>
+          @if (hasFilters) {
+            <h3>No projects match your search</h3>
+            <p>Try clearing filters or search for another name.</p>
+            <button class="btn-primary" (click)="clearFilters()">
+              Reset Filters
+            </button>
+          } @else {
+            <h3>No projects yet</h3>
+            <p>Get started by creating your first workspace.</p>
+            <a routerLink="/projects/new" class="btn-primary">
+              Create Project
+            </a>
+          }
+        </div>
+      </div>
+    }
+  }
+
+</div>

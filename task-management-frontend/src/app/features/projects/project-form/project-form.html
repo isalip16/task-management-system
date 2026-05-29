@@ -1,1 +1,68 @@
-<p>project-form works!</p>
+<div class="project-form-container">
+  
+  <app-page-header 
+    [title]="isEditMode ? 'Edit Project' : 'Create Project'" 
+    [subtitle]="isEditMode ? 'Modify details of your workspace' : 'Create a new workspace for your tasks'">
+    <a [routerLink]="isEditMode ? ['/projects', projectId] : ['/projects']" class="btn-secondary">
+      Back
+    </a>
+  </app-page-header>
+
+  @if (isLoadingProject) {
+    <div class="loading-state-card">
+      <span>Loading project details...</span>
+    </div>
+  }
+
+  @if (!isLoadingProject) {
+    <div class="form-card">
+      @if (errorMessage) {
+        <div class="alert-error">
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+        <div class="form-group">
+          <label for="name">Project Name</label>
+          <input 
+            type="text" 
+            id="name" 
+            formControlName="name" 
+            placeholder="e.g. Website Redesign"
+            [class.is-invalid]="f['name'].touched && f['name'].invalid" />
+          @if (f['name'].touched && f['name'].errors) {
+            <span class="error-msg">
+              @if (f['name'].errors['required']) { Project name is required }
+              @if (f['name'].errors['maxlength']) { Project name cannot exceed 100 characters }
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description (Optional)</label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            placeholder="Describe the goals and scope of this project..." 
+            rows="5"
+            [class.is-invalid]="f['description'].touched && f['description'].invalid"></textarea>
+          @if (f['description'].touched && f['description'].errors) {
+            <span class="error-msg">
+              @if (f['description'].errors['maxlength']) { Description cannot exceed 500 characters }
+            </span>
+          }
+        </div>
+
+        <div class="form-actions">
+          <a [routerLink]="isEditMode ? ['/projects', projectId] : ['/projects']" class="btn-secondary btn-cancel">
+            Cancel
+          </a>
+          <button type="submit" class="btn-primary btn-submit" [disabled]="projectForm.invalid || isLoading">
+            {{ isLoading ? 'Saving...' : 'Save Project' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>
