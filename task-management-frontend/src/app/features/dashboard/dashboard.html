@@ -1,161 +1,139 @@
-<div class="dashboard">
+<div class="dashboard-container">
+  
+  <app-page-header 
+    title="Dashboard" 
+    [subtitle]="'Welcome back, ' + (currentUser?.name || 'there')">
+    <a routerLink="/projects" class="btn-primary">
+      New Project
+    </a>
+  </app-page-header>
 
-    <!-- Page header -->
-    <div class="page-header">
-        <div>
-            <h1>Dashboard</h1>
-            <p class="subtitle">Welcome back, {{ currentUser?.name || 'there' }}</p>
-        </div>
-        <a routerLink="/projects" class="btn-primary">+ New Project</a>
+  @if (errorMessage && !isLoading) {
+    <div class="alert-error">
+      <span>{{ errorMessage }}</span>
     </div>
+  }
 
-    <!-- Loading state -->
-    @if (isLoading) {
-    <div class="loading-grid">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
+  @if (isLoading) {
+    <app-skeleton-loader type="stats" [count]="4"></app-skeleton-loader>
+    <div style="margin-top: 24px;">
+      <app-skeleton-loader type="list" [count]="1"></app-skeleton-loader>
     </div>
-    }
+  }
 
-    <!-- Error state -->
-    @if (errorMessage && !isLoading) {
-    <div class="alert-error">{{ errorMessage }}</div>
-    }
-
-    <!-- Stats -->
-    @if (stats && !isLoading) {
+  @if (stats && !isLoading) {
     <div class="stats-grid">
-
-        <div class="stat-card stat-projects">
-            <div class="stat-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>
-            </div>
-            <div class="stat-info">
-                <span class="stat-value">{{ stats.totalProjects }}</span>
-                <span class="stat-label">Total Projects</span>
-            </div>
+      
+      <div class="stat-card stat-projects">
+        <div class="stat-content">
+          <div class="stat-icon-wrapper">📁</div>
+          <div class="stat-details">
+            <span class="stat-value">{{ stats.totalProjects }}</span>
+            <span class="stat-label">Total Projects</span>
+          </div>
         </div>
+      </div>
 
-        <div class="stat-card stat-total">
-            <div class="stat-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
-            </div>
-            <div class="stat-info">
-                <span class="stat-value">{{ stats.tasks.total }}</span>
-                <span class="stat-label">Total Tasks</span>
-            </div>
+      <div class="stat-card stat-tasks">
+        <div class="stat-content">
+          <div class="stat-icon-wrapper">📋</div>
+          <div class="stat-details">
+            <span class="stat-value">{{ stats.tasks.total }}</span>
+            <span class="stat-label">Total Tasks</span>
+          </div>
         </div>
+      </div>
 
-        <div class="stat-card stat-inprogress">
-            <div class="stat-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            </div>
-            <div class="stat-info">
-                <span class="stat-value">{{ stats.tasks.IN_PROGRESS }}</span>
-                <span class="stat-label">In Progress</span>
-            </div>
+      <div class="stat-card stat-progress">
+        <div class="stat-content">
+          <div class="stat-icon-wrapper">⚡</div>
+          <div class="stat-details">
+            <span class="stat-value">{{ stats.tasks.IN_PROGRESS }}</span>
+            <span class="stat-label">In Progress</span>
+          </div>
         </div>
+      </div>
 
-        <div class="stat-card stat-done">
-            <div class="stat-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-            </div>
-            <div class="stat-info">
-                <span class="stat-value">{{ stats.tasks.DONE }}</span>
-                <span class="stat-label">Completed</span>
-            </div>
+      <div class="stat-card stat-done">
+        <div class="stat-content">
+          <div class="stat-icon-wrapper">✓</div>
+          <div class="stat-details">
+            <span class="stat-value">{{ stats.tasks.DONE }}</span>
+            <span class="stat-label">Completed</span>
+          </div>
         </div>
+      </div>
 
     </div>
 
-    <!-- Task breakdown -->
-    <div class="section">
-        <h2>Task Overview</h2>
-
-        <div class="task-breakdown">
-
-            <div class="breakdown-row">
-                <span class="breakdown-label">
-                    <span class="dot dot-todo"></span> To Do
-                </span>
-                <div class="progress-bar-wrap">
-                    <div class="progress-bar"
-                        [style.width.%]="stats.tasks.total > 0 ? (stats.tasks.TODO / stats.tasks.total) * 100 : 0"
-                        style="background:#e5e7eb"></div>
-                </div>
-                <span class="breakdown-count">{{ stats.tasks.TODO }}</span>
-            </div>
-
-            <div class="breakdown-row">
-                <span class="breakdown-label">
-                    <span class="dot dot-inprogress"></span> In Progress
-                </span>
-                <div class="progress-bar-wrap">
-                    <div class="progress-bar"
-                        [style.width.%]="stats.tasks.total > 0 ? (stats.tasks.IN_PROGRESS / stats.tasks.total) * 100 : 0"
-                        style="background:#f59e0b"></div>
-                </div>
-                <span class="breakdown-count">{{ stats.tasks.IN_PROGRESS }}</span>
-            </div>
-
-            <div class="breakdown-row">
-                <span class="breakdown-label">
-                    <span class="dot dot-done"></span> Done
-                </span>
-                <div class="progress-bar-wrap">
-                    <div class="progress-bar" [style.width.%]="completionPercentage" style="background:#10b981"></div>
-                </div>
-                <span class="breakdown-count">{{ stats.tasks.DONE }}</span>
-            </div>
-
+    <!-- Task Breakdown Card -->
+    <div class="breakdown-card">
+      <h3 class="section-title">Task Progress Overview</h3>
+      <div class="breakdown-content">
+        
+        <div class="breakdown-row">
+          <div class="breakdown-info">
+            <span class="status-indicator status-todo"></span>
+            <span class="breakdown-label">To Do</span>
+            <span class="breakdown-count">{{ stats.tasks.TODO }}</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar progress-todo" [style.width.%]="stats.tasks.total > 0 ? (stats.tasks.TODO / stats.tasks.total) * 100 : 0"></div>
+          </div>
         </div>
 
-        <!-- Overall completion -->
-        <div class="completion">
-            <span>Overall completion</span>
-            <strong>{{ completionPercentage }}%</strong>
+        <div class="breakdown-row">
+          <div class="breakdown-info">
+            <span class="status-indicator status-inprogress"></span>
+            <span class="breakdown-label">In Progress</span>
+            <span class="breakdown-count">{{ stats.tasks.IN_PROGRESS }}</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar progress-inprogress" [style.width.%]="stats.tasks.total > 0 ? (stats.tasks.IN_PROGRESS / stats.tasks.total) * 100 : 0"></div>
+          </div>
         </div>
-    </div>
 
-    <!-- Quick links -->
-    <div class="section">
-        <h2>Quick Actions</h2>
-        <div class="quick-actions">
-            <a routerLink="/projects" class="action-card">
-                <span class="action-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>
-                </span>
-                <span>View Projects</span>
-            </a>
-            <a routerLink="/tasks" class="action-card">
-                <span class="action-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
-                </span>
-                <span>View All Tasks</span>
-            </a>
-            <a routerLink="/tasks" [queryParams]="{ status: 'IN_PROGRESS' }" class="action-card">
-                <span class="action-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                </span>
-                <span>In Progress Tasks</span>
-            </a>
+        <div class="breakdown-row">
+          <div class="breakdown-info">
+            <span class="status-indicator status-done"></span>
+            <span class="breakdown-label">Completed</span>
+            <span class="breakdown-count">{{ stats.tasks.DONE }}</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar progress-done" [style.width.%]="completionPercentage"></div>
+          </div>
         </div>
+
+        <div class="divider"></div>
+
+        <div class="overall-completion">
+          <span class="completion-text">Overall Project Completion</span>
+          <span class="completion-percentage">{{ completionPercentage }}%</span>
+        </div>
+      </div>
     </div>
 
-    }
-
-    <!-- Empty state — no projects yet -->
-    @if (stats && stats.totalProjects === 0 && !isLoading) {
-    <div class="empty-state">
-        <span class="empty-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 15v1.5a1.5 1.5 0 0 0 1.5 1.5H12"/></svg>
-        </span>
-        <h3>No projects yet</h3>
-        <p>Create your first project to start tracking tasks</p>
-        <a routerLink="/projects" class="btn-primary">Create First Project</a>
+    <!-- Quick Actions Card -->
+    <div class="quick-actions-section">
+      <h3 class="section-title-sub">Quick Actions</h3>
+      <div class="quick-actions-grid">
+        <a routerLink="/projects" class="btn-secondary">
+          View All Projects
+        </a>
+      </div>
     </div>
-    }
+  }
 
+  @if (stats && stats.totalProjects === 0 && !isLoading) {
+    <div class="empty-state-card">
+      <div class="empty-state-content">
+        <div class="empty-icon-wrapper">🚀</div>
+        <h2>Welcome to TaskFlow!</h2>
+        <p>You haven't created any projects yet. Create your first project to organize your workflows, add tasks, and track team progress.</p>
+        <a routerLink="/projects" class="btn-primary btn-create-first">
+          Create Your First Project
+        </a>
+      </div>
+    </div>
+  }
 </div>

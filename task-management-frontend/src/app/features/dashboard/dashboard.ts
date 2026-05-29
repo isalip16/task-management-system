@@ -1,16 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProjectsService } from '@core/services/projects.service';
 import { AuthService } from '@core/services/auth.service';
 import { DashboardStats, User } from '@core/models';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header';
+import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    PageHeaderComponent,
+    SkeletonLoaderComponent
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard implements OnInit {
   stats: DashboardStats | null = null;
@@ -21,6 +29,7 @@ export class Dashboard implements OnInit {
   constructor(
     private projectsService: ProjectsService,
     private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -34,13 +43,16 @@ export class Dashboard implements OnInit {
       next: (response) => {
         this.stats = response.data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.errorMessage = 'Failed to load dashboard stats. Please try again later.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
     });
   }
+
   get completionPercentage(): number {
     if (!this.stats || this.stats.tasks.total === 0) {
       return 0;
