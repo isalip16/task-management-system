@@ -1,0 +1,50 @@
+.project-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.loading-state-card {
+  padding: 40px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.form-card {
+  padding: 32px 24px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+
+  button, a {
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-submit {
+    min-width: 140px;
+  }
+}
