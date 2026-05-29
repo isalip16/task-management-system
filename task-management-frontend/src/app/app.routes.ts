@@ -22,17 +22,17 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('@features/dashboard/dashboard-module').then(m => m.DashboardModule)
+          import('@features/dashboard/dashboard.module').then(m => m.DashboardModule)
       },
       {
         path: 'projects',
         loadChildren: () =>
-          import('@features/projects/projects-module').then(m => m.ProjectsModule)
+          import('@features/projects/projects.module').then(m => m.ProjectsModule)
       },
       {
         path: 'tasks',
         loadChildren: () =>
-          import('@features/tasks/tasks-module').then(m => m.TasksModule)
+          import('@features/tasks/tasks.module').then(m => m.TasksModule)
       },
     ]
   },
