@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TaskForm } from './task-form';
+import { TaskForm } from './task-form.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TasksService } from '@core/services/tasks.service';
 import { ProjectsService } from '@core/services/projects.service';

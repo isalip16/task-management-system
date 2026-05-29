@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProjectsService } from '@core/services/projects.service';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-project-form',
@@ -14,8 +14,8 @@ import { PageHeaderComponent } from '@shared/components/page-header/page-header'
     RouterLink,
     PageHeaderComponent
   ],
-  templateUrl: './project-form.html',
-  styleUrl: './project-form.scss',
+  templateUrl: './project-form.component.html',
+  styleUrl: './project-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectForm implements OnInit {

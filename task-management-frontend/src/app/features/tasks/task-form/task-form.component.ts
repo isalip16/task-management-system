@@ -5,7 +5,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { TasksService } from '@core/services/tasks.service';
 import { ProjectsService } from '@core/services/projects.service';
 import { Task, TaskPriority, TaskStatus, User } from '@core/models';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-task-form',
@@ -16,8 +16,8 @@ import { PageHeaderComponent } from '@shared/components/page-header/page-header'
     RouterLink,
     PageHeaderComponent
   ],
-  templateUrl: './task-form.html',
-  styleUrl: './task-form.scss',
+  templateUrl: './task-form.component.html',
+  styleUrl: './task-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskForm implements OnInit {

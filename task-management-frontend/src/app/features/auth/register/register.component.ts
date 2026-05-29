@@ -12,7 +12,7 @@ import { AuthService } from '@core/services/auth.service';
     ReactiveFormsModule,
     RouterLink
   ],
-  templateUrl: './register.html',
+  templateUrl: './register.component.html',
   styleUrl: '../auth.scss',
 })
 export class Register implements OnInit {

@@ -4,8 +4,8 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProjectsService } from '@core/services/projects.service';
 import { Project, ProjectStatus } from '@core/models';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header';
-import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-project-list',
@@ -17,8 +17,8 @@ import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skel
     PageHeaderComponent,
     SkeletonLoaderComponent
   ],
-  templateUrl: './project-list.html',
-  styleUrl: './project-list.scss',
+  templateUrl: './project-list.component.html',
+  styleUrl: './project-list.component.scss',
 })
 export class ProjectList implements OnInit {
   projects: Project[] = [];

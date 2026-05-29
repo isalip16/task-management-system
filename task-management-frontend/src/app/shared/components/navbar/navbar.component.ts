@@ -12,8 +12,8 @@ import { User } from '@core/models';
     RouterLink,
     RouterLinkActive
   ],
-  templateUrl: './navbar.html',
-  styleUrl: './navbar.scss'
+  templateUrl: './navbar.component.html',
+  styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit {
   currentUser: User | null = null;

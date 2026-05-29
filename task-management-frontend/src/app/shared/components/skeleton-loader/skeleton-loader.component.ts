@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-skeleton-loader',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './skeleton-loader.html',
-  styleUrl: './skeleton-loader.scss'
+  templateUrl: './skeleton-loader.component.html',
+  styleUrl: './skeleton-loader.component.scss'
 })
 export class SkeletonLoaderComponent {
   @Input() type: 'card' | 'stats' | 'list' | 'detail' = 'card';

@@ -4,8 +4,8 @@ import { RouterLink } from '@angular/router';
 import { ProjectsService } from '@core/services/projects.service';
 import { AuthService } from '@core/services/auth.service';
 import { DashboardStats, User } from '@core/models';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header';
-import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,8 +16,8 @@ import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skel
     PageHeaderComponent,
     SkeletonLoaderComponent
   ],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard implements OnInit {

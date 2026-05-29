@@ -1,17 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
-import { LoadingSpinner } from './loading-spinner';
+import { Register } from './register.component';
 
-describe('LoadingSpinner', () => {
-  let component: LoadingSpinner;
-  let fixture: ComponentFixture<LoadingSpinner>;
+describe('Register', () => {
+  let component: Register;
+  let fixture: ComponentFixture<Register>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoadingSpinner],
+      imports: [Register],
+      providers: [provideRouter([])]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LoadingSpinner);
+    fixture = TestBed.createComponent(Register);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
