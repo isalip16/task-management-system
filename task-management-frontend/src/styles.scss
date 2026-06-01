@@ -189,3 +189,12 @@ h1, h2, h3, h4, h5, h6 {
 .shimmer {
   background-color: #e5e7eb;
 }
+
+// Material Icons inline alignment utility
+.material-icons {
+  &.icon-inline {
+    font-size: 16px;
+    vertical-align: -3px;
+    margin-right: 4px;
+  }
+}
