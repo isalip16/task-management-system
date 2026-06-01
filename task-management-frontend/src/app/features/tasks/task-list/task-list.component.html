@@ -1,1 +1,164 @@
-<p>task-list works!</p>
+<div class="task-list">
+
+  <!-- Header -->
+  <app-page-header [title]="'Tasks'" [subtitle]="totalTasks + ' task' + (totalTasks !== 1 ? 's' : '') + ' total'">
+    <a routerLink="/tasks/new" class="btn-primary">+ New Task</a>
+  </app-page-header>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <input
+      type="text"
+      placeholder="Search tasks..."
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      class="search-input"
+    />
+
+    <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
+      <option value="">All Statuses</option>
+      <option value="TODO">To Do</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="DONE">Done</option>
+    </select>
+
+    <select [(ngModel)]="selectedPriority" (change)="onFilterChange()" class="filter-select">
+      <option value="">All Priorities</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+
+    <select [(ngModel)]="selectedProjectId" (change)="onFilterChange()" class="filter-select">
+      <option value="">All Projects</option>
+      @for (project of projects; track project._id) {
+        <option [value]="project._id">{{ project.name }}</option>
+      }
+    </select>
+
+    @if (hasFilters) {
+      <button class="btn-clear" (click)="clearFilters()">Clear</button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+    <app-skeleton-loader type="list" [count]="5"></app-skeleton-loader>
+  }
+
+  <!-- Error -->
+  @if (errorMessage && !isLoading) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  <!-- Task list -->
+  @if (!isLoading && !errorMessage) {
+    @if (tasks.length > 0) {
+      <div class="task-rows">
+        @for (task of tasks; track task._id) {
+          <div class="task-row" [class.task-done]="task.status === TaskStatus.DONE">
+
+            <!-- Left: status indicator + title -->
+            <div class="task-main">
+              <span class="status-dot" [class]="'dot-' + task.status"></span>
+              <div class="task-info">
+                <span class="task-title">{{ task.title }}</span>
+                @if (getProjectName(task)) {
+                  <span class="task-project"><span class="material-icons icon-inline">folder</span>{{ getProjectName(task) }}</span>
+                }
+              </div>
+            </div>
+
+            <!-- Middle: badges -->
+            <div class="task-badges">
+              <span class="badge status-badge" [class]="'status-' + task.status">
+                {{ getStatusLabel(task.status) }}
+              </span>
+              <span class="badge priority-badge" [class]="'priority-' + task.priority">
+                {{ task.priority }}
+              </span>
+              @if (task.assignedTo) {
+                <span class="badge assignee-badge">
+                  <span class="material-icons icon-inline">person</span>{{ task.assignedTo.name }}
+                </span>
+              }
+              @if (task.dueDate) {
+                <span class="badge due-badge">
+                  <span class="material-icons icon-inline">event</span>{{ task.dueDate | date: 'MMM d' }}
+                </span>
+              }
+            </div>
+
+            <!-- Right: actions -->
+            <div class="task-actions">
+
+              <!-- Status transition buttons -->
+              @for (nextStatus of getNextStatuses(task); track nextStatus) {
+                <button
+                  class="btn-status"
+                  [class]="'btn-status-' + nextStatus"
+                  (click)="updateStatus(task, nextStatus)"
+                >
+                  → {{ getStatusLabel(nextStatus) }}
+                </button>
+              }
+
+              <a
+                [routerLink]="['/tasks', task._id, 'edit']"
+                class="btn-icon"
+                title="Edit"
+              >
+                <span class="material-icons">edit</span>
+              </a>
+              <button
+                class="btn-icon btn-icon-danger"
+                (click)="deleteTask(task)"
+                title="Delete"
+              >
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button
+            class="page-btn"
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1)"
+          >
+            ← Prev
+          </button>
+          <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+          <button
+            class="page-btn"
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Next →
+          </button>
+        </div>
+      }
+
+    } @else {
+      <!-- Empty state -->
+      <div class="empty-state">
+        <span class="material-icons empty-icon">assignment</span>
+        @if (hasFilters) {
+          <h3>No tasks match your filters</h3>
+          <p>Try different keywords or clear the filters</p>
+          <button class="btn-primary" (click)="clearFilters()">Clear Filters</button>
+        } @else {
+          <h3>No tasks yet</h3>
+          <p>Create your first task to get started</p>
+          <a routerLink="/tasks/new" class="btn-primary">Create Task</a>
+        }
+      </div>
+    }
+  }
+
+</div>

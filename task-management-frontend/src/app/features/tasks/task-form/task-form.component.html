@@ -1,112 +1,134 @@
-<div class="task-form-container">
-  
-  <app-page-header 
-    [title]="isEditMode ? 'Edit Task' : 'Create Task'" 
-    [subtitle]="isEditMode ? 'Modify task properties and status' : 'Add a new task to this project'">
-    <a [routerLink]="['/projects', projectId]" class="btn-secondary" *ngIf="projectId">
-      Back to Workspace
-    </a>
-  </app-page-header>
+<div class="task-form-page">
+  <div class="form-card">
 
-  @if (isLoadingData) {
-    <div class="loading-state-card">
-      <span>Loading task options...</span>
+    <!-- Header -->
+    <div class="form-header">
+      <a (click)="goBack()" class="back-link" style="cursor:pointer">
+        <span class="material-icons icon-inline">arrow_back</span> Back
+      </a>
+      <h1>{{ isEditMode ? 'Edit Task' : 'New Task' }}</h1>
+      <p class="subtitle">
+        {{ isEditMode ? 'Update the task details below' : 'Fill in the details to create a new task' }}
+      </p>
     </div>
-  }
 
-  @if (!isLoadingData) {
-    <div class="form-card">
-      @if (errorMessage) {
-        <div class="alert-error">
-          <span>{{ errorMessage }}</span>
+    @if (isLoadingData) {
+      <div class="loading-msg">Loading...</div>
+    }
+
+    @if (!isLoadingData) {
+
+      <!-- Status section (edit mode only) -->
+      @if (isEditMode) {
+        <div class="status-section">
+          <span class="current-status-label">Current Status:</span>
+          <span class="status-badge" [class]="'status-' + currentStatus">
+            {{ currentStatus === 'IN_PROGRESS' ? 'In Progress' : currentStatus === 'TODO' ? 'To Do' : 'Done' }}
+          </span>
+
+          @if (availableStatuses.length > 0) {
+            <div class="status-actions">
+              <span class="move-label">Move to:</span>
+              @for (status of availableStatuses; track status) {
+                <button
+                  class="btn-status"
+                  [class]="'btn-status-' + status"
+                  (click)="onStatusChange(status)"
+                >
+                  {{ status === 'IN_PROGRESS' ? 'In Progress' : status === 'TODO' ? 'To Do' : 'Done' }}
+                </button>
+              }
+            </div>
+          }
         </div>
       }
 
-      <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
-        
+      <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+
         <div class="form-group">
-          <label for="title">Task Title</label>
-          <input 
-            type="text" 
-            id="title" 
-            formControlName="title" 
-            placeholder="e.g. Write unit tests"
-            [class.is-invalid]="f['title'].touched && f['title'].invalid" />
-          @if (f['title'].touched && f['title'].errors) {
-            <span class="error-msg">
-              @if (f['title'].errors['required']) { Title is required }
-              @if (f['title'].errors['maxlength']) { Title cannot exceed 100 characters }
-            </span>
+          <label>Task Title <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="e.g. Fix login bug"
+            [class.is-invalid]="f['title'].touched && f['title'].errors"
+          />
+          @if (f['title'].touched && f['title'].errors?.['required']) {
+            <span class="error-msg">Title is required</span>
+          }
+          @if (f['title'].touched && f['title'].errors?.['maxlength']) {
+            <span class="error-msg">Title cannot exceed 200 characters</span>
           }
         </div>
 
-        <div class="form-row-2">
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            formControlName="description"
+            placeholder="What needs to be done?"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
-            <label for="assignedTo">Assignee</label>
-            <select id="assignedTo" formControlName="assignedTo" class="form-select">
+            <label>Project <span class="required">*</span></label>
+            <select
+              formControlName="projectId"
+              [class.is-invalid]="f['projectId'].touched && f['projectId'].errors"
+            >
+              <option value="">Select a project</option>
+              @for (project of projects; track project._id) {
+                <option [value]="project._id">{{ project.name }}</option>
+              }
+            </select>
+            @if (f['projectId'].touched && f['projectId'].errors?.['required']) {
+              <span class="error-msg">Please select a project</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Priority</label>
+            <select formControlName="priority">
+              <option [value]="TaskPriority.LOW">Low</option>
+              <option [value]="TaskPriority.MEDIUM">Medium</option>
+              <option [value]="TaskPriority.HIGH">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Assign To</label>
+            <select formControlName="assignedTo">
               <option value="">Unassigned</option>
-              @for (member of projectMembers; track member._id) {
-                <option [value]="member._id">{{ member.name }}</option>
+              @for (user of users; track user._id) {
+                <option [value]="user._id">{{ user.name }}</option>
               }
             </select>
           </div>
 
           <div class="form-group">
-            <label for="priority">Priority</label>
-            <select id="priority" formControlName="priority" class="form-select">
-              @for (prio of priorities; track prio) {
-                <option [value]="prio">{{ prio | titlecase }}</option>
-              }
-            </select>
+            <label>Due Date</label>
+            <input type="date" formControlName="dueDate" />
           </div>
         </div>
 
-        <div class="form-row-2">
-          <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" formControlName="status" class="form-select">
-              @for (stat of statuses; track stat) {
-                <option [value]="stat">{{ stat | titlecase }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="dueDate">Due Date</label>
-            <input type="date" id="dueDate" formControlName="dueDate" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="description">Description (Optional)</label>
-          <textarea 
-            id="description" 
-            formControlName="description" 
-            placeholder="Provide details about what needs to be done..." 
-            rows="5"
-            [class.is-invalid]="f['description'].touched && f['description'].invalid"></textarea>
-          @if (f['description'].touched && f['description'].errors) {
-            <span class="error-msg">
-              @if (f['description'].errors['maxlength']) { Description cannot exceed 500 characters }
-            </span>
-          }
-        </div>
+        @if (errorMessage) {
+          <div class="alert-error">{{ errorMessage }}</div>
+        }
 
         <div class="form-actions">
-          @if (isEditMode) {
-            <button type="button" class="btn-secondary btn-delete" (click)="deleteTask()" [disabled]="isLoading">
-              Delete Task
-            </button>
-          }
-          <span class="spacer"></span>
-          <a [routerLink]="['/projects', projectId]" class="btn-secondary btn-cancel">
+          <button type="button" class="btn-cancel" (click)="goBack()">
             Cancel
-          </a>
-          <button type="submit" class="btn-primary btn-submit" [disabled]="taskForm.invalid || isLoading">
-            Save Task
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="isLoading">
+            {{ isLoading ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Task') }}
           </button>
         </div>
+
       </form>
-    </div>
-  }
+    }
+
+  </div>
 </div>

@@ -3,6 +3,7 @@ import { TaskForm } from './task-form.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TasksService } from '@core/services/tasks.service';
 import { ProjectsService } from '@core/services/projects.service';
+import { UsersService } from '@core/services/users.service';
 import { of } from 'rxjs';
 
 describe('TaskForm', () => {
@@ -17,11 +18,24 @@ describe('TaskForm', () => {
   };
 
   const mockProjectsService = {
-    getOne: () => of({ data: { members: [] } })
+    getOne: () => of({ data: { members: [] } }),
+    getAll: () => of({ data: { projects: [] } })
+  };
+
+  const mockUsersService = {
+    getAll: () => of({ data: { users: [] } })
   };
 
   const mockActivatedRoute = {
-    queryParams: of({ projectId: '123' })
+    queryParams: of({ projectId: '123' }),
+    snapshot: {
+      paramMap: {
+        get: () => null
+      },
+      queryParamMap: {
+        get: () => null
+      }
+    }
   };
 
   const mockRouter = {
@@ -34,6 +48,7 @@ describe('TaskForm', () => {
       providers: [
         { provide: TasksService, useValue: mockTasksService },
         { provide: ProjectsService, useValue: mockProjectsService },
+        { provide: UsersService, useValue: mockUsersService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: Router, useValue: mockRouter }
       ]

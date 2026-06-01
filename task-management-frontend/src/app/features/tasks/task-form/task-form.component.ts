@@ -1,45 +1,60 @@
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { TasksService } from '@core/services/tasks.service';
 import { ProjectsService } from '@core/services/projects.service';
-import { Task, TaskPriority, TaskStatus, User } from '@core/models';
-import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { UsersService } from '@core/services/users.service';
+import { TaskStatus, TaskPriority, Project, User } from '@core/models';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    PageHeaderComponent
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './task-form.component.html',
   styleUrl: './task-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskForm implements OnInit {
   taskForm!: FormGroup;
+  projects: Project[] = [];
+  users: User[] = [];
+
   isLoading = false;
   isLoadingData = true;
   errorMessage = '';
-  
-  projectId: string | null = null;
-  taskId: string | null = null;
-  projectMembers: User[] = [];
-  priorities = Object.values(TaskPriority);
-  statuses = Object.values(TaskStatus);
 
-  get isEditMode(): boolean {
-    return !!this.taskId;
+  // Detect mode from URL
+  // /tasks/new          → create mode (taskId is null)
+  // /tasks/:id/edit     → edit mode   (taskId has a value)
+  taskId: string | null = null;
+
+  // Pre-selected project from query param (?projectId=xxx)
+  preselectedProjectId: string | null = null;
+
+  // Expose enums to template
+  TaskPriority = TaskPriority;
+  TaskStatus = TaskStatus;
+
+  // Valid transitions for the status dropdown in edit mode
+  validTransitions: Record<TaskStatus, TaskStatus[]> = {
+    [TaskStatus.TODO]: [TaskStatus.IN_PROGRESS],
+    [TaskStatus.IN_PROGRESS]: [TaskStatus.TODO, TaskStatus.DONE],
+    [TaskStatus.DONE]: [TaskStatus.IN_PROGRESS],
+  };
+
+  currentStatus: TaskStatus = TaskStatus.TODO;
+
+  get isEditMode(): boolean { return !!this.taskId; }
+
+  goBack() {
+    window.history.back();
   }
 
   constructor(
     private fb: FormBuilder,
     private tasksService: TasksService,
     private projectsService: ProjectsService,
+    private usersService: UsersService,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
@@ -47,99 +62,111 @@ export class TaskForm implements OnInit {
 
   ngOnInit() {
     this.buildForm();
-    
-    this.route.queryParams.subscribe(params => {
-      const pId = params['projectId'];
-      const tId = params['id'];
 
-      if (tId) {
-        this.taskId = tId;
-        this.loadTaskAndMembers();
-      } else if (pId) {
-        this.projectId = pId;
-        this.loadProjectMembers(pId);
-      } else {
-        this.errorMessage = 'Invalid page parameters. Project context is required.';
-        this.isLoadingData = false;
-        this.cdr.detectChanges();
-      }
-    });
+    // Read :id from route params (edit mode)
+    this.taskId = this.route.snapshot.paramMap.get('id');
+
+    // Read ?projectId from query params (pre-select project on create)
+    this.preselectedProjectId = this.route.snapshot.queryParamMap.get('projectId');
+
+    // Load dropdown data (projects + users) in parallel
+    this.loadFormData();
   }
 
   buildForm() {
     this.taskForm = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(100)]],
-      description: ['', [Validators.maxLength(500)]],
-      priority: [TaskPriority.MEDIUM, [Validators.required]],
-      status: [TaskStatus.TODO, [Validators.required]],
-      assignedTo: ['', []],
-      dueDate: ['', []],
+      title:       ['', [Validators.required, Validators.maxLength(200)]],
+      description: ['', [Validators.maxLength(1000)]],
+      projectId:   ['', [Validators.required]],
+      priority:    [TaskPriority.MEDIUM],
+      assignedTo:  [''],
+      dueDate:     [''],
     });
   }
 
-  loadProjectMembers(projId: string) {
+  loadFormData() {
     this.isLoadingData = true;
-    this.projectsService.getOne(projId).subscribe({
-      next: (response) => {
-        this.projectMembers = response.data.members;
-        this.isLoadingData = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Failed to load project members.';
-        this.isLoadingData = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
 
-  loadTaskAndMembers() {
-    this.isLoadingData = true;
-    this.tasksService.getOne(this.taskId!).subscribe({
-      next: (taskResponse) => {
-        const task = taskResponse.data;
-        const projId = typeof task.project === 'object' ? task.project._id : task.project;
-        this.projectId = projId;
+    // Load projects for the dropdown
+    this.projectsService.getAll({ limit: 100 }).subscribe({
+      next: (res) => {
+        this.projects = res.data.projects;
 
-        this.projectsService.getOne(projId).subscribe({
-          next: (projResponse) => {
-            this.projectMembers = projResponse.data.members;
-            
-            let formattedDate = '';
-            if (task.dueDate) {
-              const d = new Date(task.dueDate);
-              formattedDate = d.toISOString().substring(0, 10);
+        // Pre-select project if ?projectId was in the URL
+        if (this.preselectedProjectId) {
+          this.taskForm.patchValue({ projectId: this.preselectedProjectId });
+        }
+
+        // Load users for assigned-to dropdown
+        this.usersService.getAll({ limit: 100 }).subscribe({
+          next: (userRes) => {
+            this.users = userRes.data.users;
+
+            // If edit mode, load the task data AFTER dropdowns are ready
+            if (this.isEditMode) {
+              this.loadTask();
+            } else {
+              this.isLoadingData = false;
+              this.cdr.detectChanges();
             }
-
-            this.taskForm.patchValue({
-              title: task.title,
-              description: task.description || '',
-              priority: task.priority,
-              status: task.status,
-              assignedTo: task.assignedTo?._id || '',
-              dueDate: formattedDate,
-            });
-
-            this.isLoadingData = false;
-            this.cdr.detectChanges();
           },
           error: () => {
-            this.errorMessage = 'Failed to load project details.';
-            this.isLoadingData = false;
-            this.cdr.detectChanges();
+            if (this.isEditMode) this.loadTask();
+            else {
+              this.isLoadingData = false;
+              this.cdr.detectChanges();
+            }
           }
         });
       },
       error: () => {
-        this.errorMessage = 'Failed to load task details.';
+        this.isLoadingData = false;
+        this.errorMessage = 'Failed to load form data.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadTask() {
+    this.tasksService.getOne(this.taskId!).subscribe({
+      next: (response) => {
+        const task = response.data;
+        this.currentStatus = task.status;
+
+        // patchValue fills only the fields we specify
+        this.taskForm.patchValue({
+          title:       task.title,
+          description: task.description || '',
+          projectId:   typeof task.project === 'object'
+                         ? (task.project as any)._id
+                         : task.project,
+          priority:    task.priority,
+          assignedTo:  task.assignedTo
+                         ? (typeof task.assignedTo === 'object'
+                             ? (task.assignedTo as any)._id
+                             : task.assignedTo)
+                         : '',
+          dueDate:     task.dueDate
+                         ? new Date(task.dueDate).toISOString().split('T')[0]
+                         : '',
+        });
+
+        this.isLoadingData = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorMessage = 'Failed to load task.';
         this.isLoadingData = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  get f() {
-    return this.taskForm.controls;
+  get f() { return this.taskForm.controls; }
+
+  // Returns the valid next statuses for the current task
+  get availableStatuses(): TaskStatus[] {
+    return this.validTransitions[this.currentStatus] || [];
   }
 
   onSubmit() {
@@ -150,24 +177,31 @@ export class TaskForm implements OnInit {
 
     this.isLoading = true;
     this.errorMessage = '';
+
     const formValue = this.taskForm.value;
 
-    const payload: any = {
-      title: formValue.title,
-      description: formValue.description,
-      priority: formValue.priority,
-      status: formValue.status,
-      assignedTo: formValue.assignedTo || null,
-      dueDate: formValue.dueDate ? new Date(formValue.dueDate).toISOString() : null,
+    const payload = {
+      title:       formValue.title,
+      description: formValue.description || undefined,
+      projectId:   formValue.projectId,
+      priority:    formValue.priority,
+      assignedTo:  formValue.assignedTo || undefined,
+      dueDate:     formValue.dueDate || undefined,
     };
 
     const request$ = this.isEditMode
       ? this.tasksService.update(this.taskId!, payload)
-      : this.tasksService.create({ ...payload, projectId: this.projectId! });
+      : this.tasksService.create(payload);
 
     request$.subscribe({
-      next: () => {
-        this.router.navigate(['/projects', this.projectId]);
+      next: (response) => {
+        // Navigate back to the project detail if we know the project
+        const projectId = formValue.projectId;
+        if (projectId) {
+          this.router.navigate(['/projects', projectId]);
+        } else {
+          this.router.navigate(['/tasks']);
+        }
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to save task.';
@@ -177,18 +211,17 @@ export class TaskForm implements OnInit {
     });
   }
 
-  deleteTask() {
-    if (!confirm('Are you sure you want to delete this task? This action cannot be undone.')) return;
+  // Separate status update — goes through workflow endpoint
+  onStatusChange(newStatus: TaskStatus) {
+    if (!this.taskId) return;
 
-    this.isLoading = true;
-    this.tasksService.delete(this.taskId!).subscribe({
-      next: () => {
-        this.router.navigate(['/projects', this.projectId]);
-      },
-      error: () => {
-        this.errorMessage = 'Failed to delete task.';
-        this.isLoading = false;
+    this.tasksService.updateStatus(this.taskId, newStatus).subscribe({
+      next: (response) => {
+        this.currentStatus = response.data.status;
         this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Failed to update status.');
       }
     });
   }
