@@ -26,7 +26,7 @@
       
       <div class="stat-card stat-projects">
         <div class="stat-content">
-          <div class="stat-icon-wrapper">📁</div>
+          <div class="stat-icon-wrapper"><span class="material-icons">folder</span></div>
           <div class="stat-details">
             <span class="stat-value">{{ stats.totalProjects }}</span>
             <span class="stat-label">Total Projects</span>
@@ -36,7 +36,7 @@
 
       <div class="stat-card stat-tasks">
         <div class="stat-content">
-          <div class="stat-icon-wrapper">📋</div>
+          <div class="stat-icon-wrapper"><span class="material-icons">assignment</span></div>
           <div class="stat-details">
             <span class="stat-value">{{ stats.tasks.total }}</span>
             <span class="stat-label">Total Tasks</span>
@@ -46,7 +46,7 @@
 
       <div class="stat-card stat-progress">
         <div class="stat-content">
-          <div class="stat-icon-wrapper">⚡</div>
+          <div class="stat-icon-wrapper"><span class="material-icons">flash_on</span></div>
           <div class="stat-details">
             <span class="stat-value">{{ stats.tasks.IN_PROGRESS }}</span>
             <span class="stat-label">In Progress</span>
@@ -56,7 +56,7 @@
 
       <div class="stat-card stat-done">
         <div class="stat-content">
-          <div class="stat-icon-wrapper">✓</div>
+          <div class="stat-icon-wrapper"><span class="material-icons">check</span></div>
           <div class="stat-details">
             <span class="stat-value">{{ stats.tasks.DONE }}</span>
             <span class="stat-label">Completed</span>
@@ -127,7 +127,7 @@
   @if (stats && stats.totalProjects === 0 && !isLoading) {
     <div class="empty-state-card">
       <div class="empty-state-content">
-        <div class="empty-icon-wrapper">🚀</div>
+        <div class="empty-icon-wrapper"><span class="material-icons" style="font-size: 48px; color: #9ca3af;">rocket_launch</span></div>
         <h2>Welcome to TaskFlow!</h2>
         <p>You haven't created any projects yet. Create your first project to organize your workflows, add tasks, and track team progress.</p>
         <a routerLink="/projects" class="btn-primary btn-create-first">
