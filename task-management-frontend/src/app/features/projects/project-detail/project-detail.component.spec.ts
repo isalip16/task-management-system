@@ -36,6 +36,17 @@ describe('ProjectDetail', () => {
       data: {
         tasks: []
       }
+    }),
+    getActivityLogs: () => of({
+      success: true,
+      message: 'Success',
+      timestamp: new Date().toISOString(),
+      data: {
+        logs: [],
+        pagination: {
+          totalPages: 1
+        }
+      }
     })
   };
 

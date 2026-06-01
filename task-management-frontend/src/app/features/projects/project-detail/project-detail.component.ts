@@ -4,7 +4,7 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { ProjectsService } from '@core/services/projects.service';
 import { TasksService } from '@core/services/tasks.service';
 import { AuthService } from '@core/services/auth.service';
-import { Project, Task, TaskStatus, User } from '@core/models';
+import { Project, Task, TaskStatus, User, ActivityLog } from '@core/models';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 
@@ -28,6 +28,11 @@ export class ProjectDetail implements OnInit {
   isLoading = true;
   isLoadingTasks = true;
   errorMessage = '';
+
+  activityLogs: ActivityLog[] = [];
+  isLoadingLogs = true;
+  logsPage = 1;
+  totalLogPages = 1;
   projectId = '';
 
   TaskStatus = TaskStatus;
@@ -46,6 +51,7 @@ export class ProjectDetail implements OnInit {
     this.projectId = this.route.snapshot.paramMap.get('id')!;
     this.loadProject();
     this.loadTasks();
+    this.loadActivityLogs();
   }
 
   loadProject() {
@@ -77,6 +83,46 @@ export class ProjectDetail implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  loadActivityLogs() {
+    this.isLoadingLogs = true;
+    this.tasksService.getActivityLogs(this.projectId, this.logsPage).subscribe({
+      next: (response) => {
+        this.activityLogs = response.data.logs;
+        this.totalLogPages = response.data.pagination.totalPages;
+        this.isLoadingLogs = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoadingLogs = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadMoreLogs() {
+    if(this.logsPage>= this.totalLogPages) return;
+    this.logsPage++;
+    this.tasksService.getActivityLogs(this.projectId, this.logsPage).subscribe({
+      next: (response) => {
+        this.activityLogs = [...this.activityLogs, ...response.data.logs];
+        this.totalLogPages = response.data.pagination.totalPages;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getLogIcon(toStatus: string): string {
+    const icons: Record<string, string> = {
+      [TaskStatus.TODO]: 'schedule',
+      [TaskStatus.IN_PROGRESS]: 'autorenew',
+      [TaskStatus.DONE]: 'check_circle'
+    };
+    return icons[toStatus] || 'help';
   }
 
   getTasksByStatus(status: TaskStatus): Task[] {
