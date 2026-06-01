@@ -70,11 +70,11 @@
 
               <div class="project-meta-info">
                 <div class="meta-item">
-                  <span class="meta-icon">👤</span>
+                  <span class="material-icons icon-inline">person</span>
                   <span>{{ project.members.length }} member{{ project.members.length !== 1 ? 's' : '' }}</span>
                 </div>
                 <div class="meta-item">
-                  <span class="meta-icon">📅</span>
+                  <span class="material-icons icon-inline">event</span>
                   <span>{{ project.createdAt | date: 'MMM d, y' }}</span>
                 </div>
               </div>
@@ -109,7 +109,7 @@
       <!-- Empty State -->
       <div class="empty-state-card">
         <div class="empty-state-content">
-          <div class="empty-icon-wrapper">🔍</div>
+          <div class="empty-icon-wrapper"><span class="material-icons" style="font-size: 48px; color: #9ca3af;">search</span></div>
           @if (hasFilters) {
             <h3>No projects match your search</h3>
             <p>Try clearing filters or search for another name.</p>

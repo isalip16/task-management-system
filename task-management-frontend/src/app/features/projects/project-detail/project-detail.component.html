@@ -1,237 +1,303 @@
 <div class="project-detail-container">
   @if (errorMessage && !isLoading) {
-    <div class="alert-error">
-      <span>{{ errorMessage }}</span>
-    </div>
+  <div class="alert-error">
+    <span>{{ errorMessage }}</span>
+  </div>
   }
 
   @if (project && !isLoading) {
-    
-    <!-- Page Header -->
-    <app-page-header 
-      [title]="project.name" 
-      [subtitle]="project.description || 'No description provided.'">
-      <div class="header-actions">
-        <a routerLink="/projects" class="btn-secondary btn-back">
-          All Workspaces
+
+  <!-- Page Header -->
+  <app-page-header [title]="project.name" [subtitle]="project.description || 'No description provided.'">
+    <div class="header-actions">
+      <a routerLink="/projects" class="btn-secondary btn-back">
+        All Workspaces
+      </a>
+      @if (isOwner) {
+      <a [routerLink]="['/projects', projectId, 'edit']" class="btn-secondary">
+        Edit
+      </a>
+      <button (click)="deleteProject()" class="btn-secondary btn-delete-proj">
+        Delete Workspace
+      </button>
+      }
+    </div>
+  </app-page-header>
+
+  <!-- Project Info Row -->
+  <div class="info-row">
+    <div class="info-card">
+      <div class="info-content">
+        <span class="material-icons info-icon">person</span>
+        <div class="info-details">
+          <span class="info-label">Project Owner</span>
+          <span class="info-value">{{ project.owner.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-content">
+        <span class="material-icons info-icon">group</span>
+        <div class="info-details">
+          <span class="info-label">Members</span>
+          <span class="info-value">{{ project.members.length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-content">
+        <span class="material-icons info-icon">assignment</span>
+        <div class="info-details">
+          <span class="info-label">Total Tasks</span>
+          <span class="info-value">{{ tasks.length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-content">
+        <span class="material-icons info-icon">event</span>
+        <div class="info-details">
+          <span class="info-label">Created On</span>
+          <span class="info-value">{{ project.createdAt | date: 'MMM d, y' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section Header for Kanban Board -->
+  <div class="section-header">
+    <h2>Task Board</h2>
+    <a [routerLink]="['/tasks/new']" [queryParams]="{ projectId: projectId }" class="btn-primary">
+      + Add Task
+    </a>
+  </div>
+
+  <!-- Loading Tasks -->
+  @if (isLoadingTasks) {
+  <div style="margin-top: 16px;">
+    <app-skeleton-loader type="list" [count]="3"></app-skeleton-loader>
+  </div>
+  }
+
+  <!-- Kanban Board -->
+  @if (!isLoadingTasks) {
+  <div class="kanban-board">
+
+    <!-- TODO Column -->
+    <div class="kanban-col">
+      <div class="col-header col-todo">
+        <span class="col-title">To Do</span>
+        <span class="col-count">{{ getTasksByStatus(TaskStatus.TODO).length }}</span>
+      </div>
+
+      <div class="task-list-container">
+        @for (task of getTasksByStatus(TaskStatus.TODO); track task._id) {
+        <a [routerLink]="['/tasks']" [queryParams]="{ id: task._id }" class="task-card">
+          <div class="task-card-header">
+            <span class="priority-badge priority-{{ task.priority }}">
+              {{ task.priority }}
+            </span>
+            @if (task.dueDate) {
+            <span class="due-badge">
+              <span class="material-icons icon-inline">event</span>{{ task.dueDate | date: 'MMM d' }}
+            </span>
+            }
+          </div>
+          <p class="task-title">{{ task.title }}</p>
+          @if (task.description) {
+          <p class="task-desc">{{ task.description }}</p>
+          }
+
+          <div class="task-card-footer">
+            @if (task.assignedTo) {
+            <div class="assignee-avatar" [title]="task.assignedTo.name">
+              {{ task.assignedTo.name.charAt(0).toUpperCase() }}
+            </div>
+            } @else {
+            <div class="unassigned-avatar" title="Unassigned" style="display: flex; align-items: center; justify-content: center;">
+              <span class="material-icons" style="font-size: 16px;">person</span>
+            </div>
+            }
+          </div>
         </a>
-        @if (isOwner) {
-          <a [routerLink]="['/projects', projectId, 'edit']" class="btn-secondary">
-            Edit
-          </a>
-          <button (click)="deleteProject()" class="btn-secondary btn-delete-proj">
-            Delete Workspace
+        }
+
+        @if (getTasksByStatus(TaskStatus.TODO).length === 0) {
+        <div class="col-empty">
+          <span>No tasks yet</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- IN PROGRESS Column -->
+    <div class="kanban-col">
+      <div class="col-header col-inprogress">
+        <span class="col-title">In Progress</span>
+        <span class="col-count">{{ getTasksByStatus(TaskStatus.IN_PROGRESS).length }}</span>
+      </div>
+
+      <div class="task-list-container">
+        @for (task of getTasksByStatus(TaskStatus.IN_PROGRESS); track task._id) {
+        <a [routerLink]="['/tasks']" [queryParams]="{ id: task._id }" class="task-card">
+          <div class="task-card-header">
+            <span class="priority-badge priority-{{ task.priority }}">
+              {{ task.priority }}
+            </span>
+            @if (task.dueDate) {
+            <span class="due-badge">
+              <span class="material-icons icon-inline">event</span>{{ task.dueDate | date: 'MMM d' }}
+            </span>
+            }
+          </div>
+          <p class="task-title">{{ task.title }}</p>
+          @if (task.description) {
+          <p class="task-desc">{{ task.description }}</p>
+          }
+
+          <div class="task-card-footer">
+            @if (task.assignedTo) {
+            <div class="assignee-avatar" [title]="task.assignedTo.name">
+              {{ task.assignedTo.name.charAt(0).toUpperCase() }}
+            </div>
+            } @else {
+            <div class="unassigned-avatar" title="Unassigned" style="display: flex; align-items: center; justify-content: center;">
+              <span class="material-icons" style="font-size: 16px;">person</span>
+            </div>
+            }
+          </div>
+        </a>
+        }
+
+        @if (getTasksByStatus(TaskStatus.IN_PROGRESS).length === 0) {
+        <div class="col-empty">
+          <span>No active tasks</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- DONE Column -->
+    <div class="kanban-col">
+      <div class="col-header col-done">
+        <span class="col-title">Done</span>
+        <span class="col-count">{{ getTasksByStatus(TaskStatus.DONE).length }}</span>
+      </div>
+
+      <div class="task-list-container">
+        @for (task of getTasksByStatus(TaskStatus.DONE); track task._id) {
+        <a [routerLink]="['/tasks']" [queryParams]="{ id: task._id }" class="task-card task-card-done">
+          <div class="task-card-header">
+            <span class="priority-badge priority-{{ task.priority }}">
+              {{ task.priority }}
+            </span>
+            @if (task.dueDate) {
+            <span class="due-badge">
+              <span class="material-icons icon-inline">event</span>{{ task.dueDate | date: 'MMM d' }}
+            </span>
+            }
+          </div>
+          <p class="task-title">{{ task.title }}</p>
+          @if (task.description) {
+          <p class="task-desc">{{ task.description }}</p>
+          }
+
+          <div class="task-card-footer">
+            @if (task.assignedTo) {
+            <div class="assignee-avatar" [title]="task.assignedTo.name">
+              {{ task.assignedTo.name.charAt(0).toUpperCase() }}
+            </div>
+            } @else {
+            <div class="unassigned-avatar" title="Unassigned" style="display: flex; align-items: center; justify-content: center;">
+              <span class="material-icons" style="font-size: 16px;">person</span>
+            </div>
+            }
+          </div>
+        </a>
+        }
+
+        @if (getTasksByStatus(TaskStatus.DONE).length === 0) {
+        <div class="col-empty">
+          <span>No completed tasks</span>
+        </div>
+        }
+      </div>
+    </div>
+
+  </div>
+  }
+
+  <!-- ── Activity Log ──────────────────────────────────────────── -->
+  <div class="section-header" style="margin-top: 40px;">
+    <h2>Activity Log</h2>
+  </div>
+
+  @if (isLoadingLogs) {
+    <div class="log-skeleton-wrap">
+      @for (i of [1,2,3]; track i) {
+        <div class="log-skeleton"></div>
+      }
+    </div>
+  }
+
+  @if (!isLoadingLogs) {
+    @if (activityLogs.length > 0) {
+      <div class="activity-log">
+        @for (log of activityLogs; track log._id) {
+          <div class="log-entry">
+
+            <!-- Icon -->
+            <div class="log-icon"><span class="material-icons">{{ getLogIcon(log.toStatus) }}</span></div>
+
+            <!-- Content -->
+            <div class="log-content">
+              <p class="log-action">{{ log.action }}</p>
+              <div class="log-meta">
+                <span class="log-user">
+                  {{ log.changedBy.name || 'Unknown' }}
+                </span>
+                <span class="log-dot">·</span>
+                <span class="log-time">
+                  {{ log.createdAt | date: 'MMM d, y · h:mm a' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Status transition badge -->
+            <div class="log-transition">
+              @if (log.fromStatus) {
+                <span class="log-status" [class]="'log-status-' + log.fromStatus">
+                  {{ log.fromStatus === 'IN_PROGRESS' ? 'In Progress' :
+                     log.fromStatus === 'TODO' ? 'To Do' : 'Done' }}
+                </span>
+                <span class="log-arrow">→</span>
+              }
+              <span class="log-status" [class]="'log-status-' + log.toStatus">
+                {{ log.toStatus === 'IN_PROGRESS' ? 'In Progress' :
+                   log.toStatus === 'TODO' ? 'To Do' : 'Done' }}
+              </span>
+            </div>
+
+          </div>
+        }
+
+        <!-- Load more -->
+        @if (logsPage < totalLogPages) {
+          <button class="btn-load-more" (click)="loadMoreLogs()">
+            Load more activity
           </button>
         }
       </div>
-    </app-page-header>
 
-    <!-- Project Info Row -->
-    <div class="info-row">
-      <div class="info-card">
-        <div class="info-content">
-          <span class="info-icon">👤</span>
-          <div class="info-details">
-            <span class="info-label">Project Owner</span>
-            <span class="info-value">{{ project.owner.name }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="info-card">
-        <div class="info-content">
-          <span class="info-icon">👥</span>
-          <div class="info-details">
-            <span class="info-label">Members</span>
-            <span class="info-value">{{ project.members.length }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="info-card">
-        <div class="info-content">
-          <span class="info-icon">📋</span>
-          <div class="info-details">
-            <span class="info-label">Total Tasks</span>
-            <span class="info-value">{{ tasks.length }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="info-card">
-        <div class="info-content">
-          <span class="info-icon">📅</span>
-          <div class="info-details">
-            <span class="info-label">Created On</span>
-            <span class="info-value">{{ project.createdAt | date: 'MMM d, y' }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Section Header for Kanban Board -->
-    <div class="section-header">
-      <h2>Kanban Task Board</h2>
-      <a routerLink="/tasks" [queryParams]="{ projectId: projectId }" class="btn-primary">
-        + Add Task
-      </a>
-    </div>
-
-    <!-- Loading Tasks -->
-    @if (isLoadingTasks) {
-      <div style="margin-top: 16px;">
-        <app-skeleton-loader type="list" [count]="3"></app-skeleton-loader>
+    } @else {
+      <div class="log-empty">
+        <span>No activity yet. Status changes will appear here.</span>
       </div>
     }
-
-    <!-- Kanban Board -->
-    @if (!isLoadingTasks) {
-      <div class="kanban-board">
-        
-        <!-- TODO Column -->
-        <div class="kanban-col">
-          <div class="col-header col-todo">
-            <span class="col-title">To Do</span>
-            <span class="col-count">{{ getTasksByStatus(TaskStatus.TODO).length }}</span>
-          </div>
-          
-          <div class="task-list-container">
-            @for (task of getTasksByStatus(TaskStatus.TODO); track task._id) {
-              <a [routerLink]="['/tasks']" [queryParams]="{ id: task._id }" class="task-card">
-                <div class="task-card-header">
-                  <span class="priority-badge priority-{{ task.priority }}">
-                    {{ task.priority }}
-                  </span>
-                  @if (task.dueDate) {
-                    <span class="due-badge">
-                      📅 {{ task.dueDate | date: 'MMM d' }}
-                    </span>
-                  }
-                </div>
-                <p class="task-title">{{ task.title }}</p>
-                @if (task.description) {
-                  <p class="task-desc">{{ task.description }}</p>
-                }
-                
-                <div class="task-card-footer">
-                  @if (task.assignedTo) {
-                    <div class="assignee-avatar" [title]="task.assignedTo.name">
-                      {{ task.assignedTo.name.charAt(0).toUpperCase() }}
-                    </div>
-                  } @else {
-                    <div class="unassigned-avatar" title="Unassigned">
-                      👤
-                    </div>
-                  }
-                </div>
-              </a>
-            }
-
-            @if (getTasksByStatus(TaskStatus.TODO).length === 0) {
-              <div class="col-empty">
-                <span>No tasks yet</span>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- IN PROGRESS Column -->
-        <div class="kanban-col">
-          <div class="col-header col-inprogress">
-            <span class="col-title">In Progress</span>
-            <span class="col-count">{{ getTasksByStatus(TaskStatus.IN_PROGRESS).length }}</span>
-          </div>
-          
-          <div class="task-list-container">
-            @for (task of getTasksByStatus(TaskStatus.IN_PROGRESS); track task._id) {
-              <a [routerLink]="['/tasks']" [queryParams]="{ id: task._id }" class="task-card">
-                <div class="task-card-header">
-                  <span class="priority-badge priority-{{ task.priority }}">
-                    {{ task.priority }}
-                  </span>
-                  @if (task.dueDate) {
-                    <span class="due-badge">
-                      📅 {{ task.dueDate | date: 'MMM d' }}
-                    </span>
-                  }
-                </div>
-                <p class="task-title">{{ task.title }}</p>
-                @if (task.description) {
-                  <p class="task-desc">{{ task.description }}</p>
-                }
-                
-                <div class="task-card-footer">
-                  @if (task.assignedTo) {
-                    <div class="assignee-avatar" [title]="task.assignedTo.name">
-                      {{ task.assignedTo.name.charAt(0).toUpperCase() }}
-                    </div>
-                  } @else {
-                    <div class="unassigned-avatar" title="Unassigned">
-                      👤
-                    </div>
-                  }
-                </div>
-              </a>
-            }
-
-            @if (getTasksByStatus(TaskStatus.IN_PROGRESS).length === 0) {
-              <div class="col-empty">
-                <span>No active tasks</span>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- DONE Column -->
-        <div class="kanban-col">
-          <div class="col-header col-done">
-            <span class="col-title">Done</span>
-            <span class="col-count">{{ getTasksByStatus(TaskStatus.DONE).length }}</span>
-          </div>
-          
-          <div class="task-list-container">
-            @for (task of getTasksByStatus(TaskStatus.DONE); track task._id) {
-              <a [routerLink]="['/tasks']" [queryParams]="{ id: task._id }" class="task-card task-card-done">
-                <div class="task-card-header">
-                  <span class="priority-badge priority-{{ task.priority }}">
-                    {{ task.priority }}
-                  </span>
-                  @if (task.dueDate) {
-                    <span class="due-badge">
-                      📅 {{ task.dueDate | date: 'MMM d' }}
-                    </span>
-                  }
-                </div>
-                <p class="task-title">{{ task.title }}</p>
-                @if (task.description) {
-                  <p class="task-desc">{{ task.description }}</p>
-                }
-                
-                <div class="task-card-footer">
-                  @if (task.assignedTo) {
-                    <div class="assignee-avatar" [title]="task.assignedTo.name">
-                      {{ task.assignedTo.name.charAt(0).toUpperCase() }}
-                    </div>
-                  } @else {
-                    <div class="unassigned-avatar" title="Unassigned">
-                      👤
-                    </div>
-                  }
-                </div>
-              </a>
-            }
-
-            @if (getTasksByStatus(TaskStatus.DONE).length === 0) {
-              <div class="col-empty">
-                <span>No completed tasks</span>
-              </div>
-            }
-          </div>
-        </div>
-
-      </div>
-    }
-
   }
+}
 
 </div>
