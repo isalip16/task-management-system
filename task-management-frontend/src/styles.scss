@@ -7,22 +7,22 @@
   --primary-color: #4f46e5; // Indigo
   --primary-hover: #4338ca;
   --primary-light: #ede9fe;
-  
+
   // Backgrounds
   --bg-app: #f9fafb;
   --bg-card: #ffffff;
   --border-color: #e5e7eb;
-  
+
   // Text Colors
   --text-main: #111827;
   --text-muted: #6b7280;
   --text-inverse: #ffffff;
-  
+
   // Shadows
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
+
   // Status Colors
   --status-todo-bg: #f3f4f6;
   --status-todo-text: #4b5563;
@@ -53,7 +53,12 @@ body {
   line-height: 1.5;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-brand);
   color: var(--text-main);
   font-weight: 700;
@@ -64,13 +69,16 @@ h1, h2, h3, h4, h5, h6 {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
@@ -136,7 +144,9 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-main);
   }
 
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     padding: 10px 14px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -157,6 +167,7 @@ h1, h2, h3, h4, h5, h6 {
 
     &.is-invalid {
       border-color: #ef4444;
+
       &:focus {
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
       }
@@ -199,8 +210,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-// Global Reusable Layout and Component styles for Cleanup
-
 // Status Badges
 .status-badge {
   display: inline-flex;
@@ -213,17 +222,23 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.5px;
   white-space: nowrap;
 
-  &.status-todo, &.status-TODO, &.log-status-TODO {
+  &.status-todo,
+  &.status-TODO,
+  &.log-status-TODO {
     background-color: var(--status-todo-bg);
     color: var(--status-todo-text);
   }
 
-  &.status-inprogress, &.status-IN_PROGRESS, &.log-status-IN_PROGRESS {
+  &.status-inprogress,
+  &.status-IN_PROGRESS,
+  &.log-status-IN_PROGRESS {
     background-color: var(--status-inprogress-bg);
     color: var(--status-inprogress-text);
   }
 
-  &.status-done, &.status-DONE, &.log-status-DONE {
+  &.status-done,
+  &.status-DONE,
+  &.log-status-DONE {
     background-color: var(--status-done-bg);
     color: var(--status-done-text);
   }
@@ -258,7 +273,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 // Pagination Controls
-.pagination-container, .pagination {
+.pagination-container,
+.pagination {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,7 +287,8 @@ h1, h2, h3, h4, h5, h6 {
   margin: 12px auto 0;
   box-shadow: var(--shadow-sm);
 
-  .btn-pagination, .page-btn {
+  .btn-pagination,
+  .page-btn {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 6px;
@@ -297,14 +314,16 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 
-  .pagination-info, .page-info {
+  .pagination-info,
+  .page-info {
     font-size: 13px;
     color: var(--text-muted);
   }
 }
 
 // Empty State Cards
-.empty-state-card, .empty-state {
+.empty-state-card,
+.empty-state {
   background-color: var(--bg-card);
   border: 2px dashed var(--border-color);
   border-radius: 12px;
@@ -318,7 +337,8 @@ h1, h2, h3, h4, h5, h6 {
   margin: 24px auto;
   gap: 16px;
 
-  .empty-icon-wrapper, .empty-icon {
+  .empty-icon-wrapper,
+  .empty-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -365,17 +385,20 @@ h1, h2, h3, h4, h5, h6 {
     gap: 4px;
   }
 
-  .search-field, .search-input {
+  .search-field,
+  .search-input {
     flex: 1;
     min-width: 260px;
   }
 
-  .filter-field, .filter-select {
+  .filter-field,
+  .filter-select {
     width: 200px;
     min-width: 150px;
   }
 
-  .search-input, .filter-select {
+  .search-input,
+  .filter-select {
     width: 100%;
     padding: 10px 14px;
     border: 1px solid var(--border-color);
@@ -413,9 +436,180 @@ h1, h2, h3, h4, h5, h6 {
   @media (max-width: 640px) {
     flex-direction: column;
     align-items: stretch;
-    
-    .filter-field, .filter-select {
+
+    .filter-field,
+    .filter-select {
       width: 100%;
     }
+  }
+}
+
+// ── Activity Log (Global Component Styles) ──────────────────────────────────
+.activity-log {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #fafafa;
+  }
+}
+
+.log-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .material-icons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+}
+
+.log-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.log-action {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: #1a1a2e;
+  font-weight: 500;
+}
+
+.log-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.log-user {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.log-dot {
+  color: #d1d5db;
+}
+
+.log-time {
+  color: #9ca3af;
+}
+
+.log-transition {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.log-arrow {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.log-status {
+  padding: 3px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.log-status-TODO {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+
+  &.log-status-IN_PROGRESS {
+    background: #fffbeb;
+    color: #92400e;
+  }
+
+  &.log-status-DONE {
+    background: #ecfdf5;
+    color: #065f46;
+  }
+}
+
+.btn-load-more {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #f9fafb;
+  border: none;
+  border-top: 1px solid #f3f4f6;
+  font-size: 13px;
+  color: #4f46e5;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}
+
+.log-empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+// ── Log skeletons ──────────────────────────────────────────────────────────
+.log-skeleton-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.log-skeleton {
+  height: 68px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
   }
 }
