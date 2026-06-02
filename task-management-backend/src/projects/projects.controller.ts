@@ -23,8 +23,8 @@ export class ProjectsController {
 
   // GET /projects/dashboard — global stats across all user's projects
   @Get("dashboard")
-  getDashboardStats(@CurrentUser() user: UserDocument) {
-    return this.projectsService.getDashboardStats(user);
+  getDashboardStats() {
+    return this.projectsService.getDashboardStats();
   }
 
   // POST /projects
@@ -37,22 +37,26 @@ export class ProjectsController {
   @Get()
   findAll(
     @Query()
-    query: { search?: string; status?: string; page?: string; limit?: string },
-    @CurrentUser() user: UserDocument,
+    query: {
+      search?: string;
+      status?: string;
+      page?: string;
+      limit?: string;
+    },
   ) {
-    return this.projectsService.findAll(query, user);
+    return this.projectsService.findAll(query);
   }
 
   // GET /projects/:id
   @Get(":id")
-  findOne(@Param("id") id: string, @CurrentUser() user: UserDocument) {
-    return this.projectsService.findOne(id, user);
+  findOne(@Param("id") id: string) {
+    return this.projectsService.findOne(id);
   }
 
   // GET /projects/:id/stats
   @Get(":id/stats")
-  getStats(@Param("id") id: string, @CurrentUser() user: UserDocument) {
-    return this.projectsService.getStats(id, user);
+  getStats(@Param("id") id: string) {
+    return this.projectsService.getStats(id);
   }
 
   // PATCH /projects/:id

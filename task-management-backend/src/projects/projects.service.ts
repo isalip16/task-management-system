@@ -41,20 +41,14 @@ export class ProjectsService {
     };
   }
 
-  async findAll(
-    query: { search?: string; status?: string; page?: string; limit?: string },
-    user: UserDocument,
-  ) {
+  async findAll(query: {
+    search?: string;
+    status?: string;
+    page?: string;
+    limit?: string;
+  }) {
     const { search, status, page, limit } = query;
     const filter: QueryFilter<ProjectDocument> = { isDeleted: false };
-
-    // Admins see all projects; members only see projects they're part of
-    if (user.role !== UserRole.ADMIN) {
-      filter.$or = [
-        { owner: user._id },
-        { members: user._id }, // $elemMatch not needed for simple equality check in array
-      ];
-    }
 
     if (status) filter.status = status as ProjectStatus;
     if (search) {
@@ -85,14 +79,13 @@ export class ProjectsService {
     };
   }
 
-  async findOne(id: string, user: UserDocument) {
+  async findOne(id: string) {
     const project = await this.projectModel
       .findOne({ _id: id, isDeleted: false })
       .populate("owner", "name email")
       .populate("members", "name email");
 
     if (!project) throw new NotFoundException("Project not found");
-    this.checkAccess(project, user);
 
     return { data: project };
   }
@@ -211,13 +204,12 @@ export class ProjectsService {
   }
 
   // Dashboard statistics for a specific project
-  async getStats(projectId: string, user: UserDocument) {
+  async getStats(projectId: string) {
     const project = await this.projectModel.findOne({
       _id: projectId,
       isDeleted: false,
     });
     if (!project) throw new NotFoundException("Project not found");
-    this.checkAccess(project, user);
 
     // MongoDB aggregation: group tasks by status and count them
     const taskStats = await this.taskModel.aggregate([
@@ -241,11 +233,8 @@ export class ProjectsService {
   }
 
   // Dashboard stats across ALL projects the user is part of
-  async getDashboardStats(user: UserDocument) {
+  async getDashboardStats() {
     const projectFilter: QueryFilter<ProjectDocument> = { isDeleted: false };
-    if (user.role !== UserRole.ADMIN) {
-      projectFilter.$or = [{ owner: user._id }, { members: user._id }];
-    }
 
     const userProjects = await this.projectModel
       .find(projectFilter)
@@ -282,16 +271,5 @@ export class ProjectsService {
         tasks,
       },
     };
-  }
-
-  // Helper: check if a user has access to a project (is member or admin)
-  private checkAccess(project: ProjectDocument, user: UserDocument) {
-    if (user.role === UserRole.ADMIN) return;
-    const hasAccess =
-      getRefId(project.owner) === user._id.toString() ||
-      project.members.some((m) => getRefId(m) === user._id.toString());
-    if (!hasAccess) {
-      throw new ForbiddenException("You are not a member of this project");
-    }
   }
 }

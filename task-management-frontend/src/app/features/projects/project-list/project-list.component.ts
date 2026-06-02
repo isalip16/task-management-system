@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProjectsService } from '@core/services/projects.service';
-import { Project, ProjectStatus } from '@core/models';
+import { AuthService } from '@core/services/auth.service';
+import { Project, ProjectStatus, User } from '@core/models';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 
@@ -24,6 +25,7 @@ export class ProjectList implements OnInit {
   projects: Project[] = [];
   isLoading = true;
   errorMessage = '';
+  currentUser: User | null = null;
 
   // Search and filter state
   searchTerm = '';
@@ -37,11 +39,22 @@ export class ProjectList implements OnInit {
 
   constructor(
     private projectsService: ProjectsService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
     this.loadProjects();
+  }
+
+  canEdit(project: Project): boolean {
+    if (!this.currentUser) return false;
+    if (this.currentUser.role === 'admin') return true;
+    const ownerId = typeof project.owner === 'object'
+      ? project.owner._id
+      : project.owner;
+    return ownerId === this.currentUser._id;
   }
 
   loadProjects() {

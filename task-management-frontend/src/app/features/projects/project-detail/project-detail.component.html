@@ -13,7 +13,7 @@
       <a routerLink="/projects" class="btn-secondary btn-back">
         All Workspaces
       </a>
-      @if (isOwner) {
+      @if (isOwner || isAdmin) {
       <a [routerLink]="['/projects', projectId, 'edit']" class="btn-secondary">
         Edit
       </a>

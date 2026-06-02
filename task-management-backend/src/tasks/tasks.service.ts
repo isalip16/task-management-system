@@ -1,8 +1,8 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types, QueryFilter } from "mongoose";
@@ -16,7 +16,7 @@ import {
   UpdateTaskStatusDto,
   TaskQueryDto,
 } from "./dto/task.dto";
-import { getRefId, getPaginationMetadata } from "../common/utils/db-helpers";
+import { getPaginationMetadata } from "../common/utils/db-helpers";
 
 // Define which status transitions are allowed.
 // TODO can go to IN_PROGRESS. IN_PROGRESS can go to DONE or back to TODO. DONE can go back to IN_PROGRESS.
@@ -42,7 +42,7 @@ export class TasksService {
     });
     if (!project) throw new NotFoundException("Project not found");
 
-    this.checkProjectAccess(project, creator);
+    this.checkProjectAccess();
 
     const task = await this.taskModel.create({
       title: dto.title,
@@ -88,20 +88,9 @@ export class TasksService {
     return filter;
   }
 
-  async findAll(query: TaskQueryDto, user: UserDocument) {
+  async findAll(query: TaskQueryDto) {
     const { page, limit } = query;
     const filter = this.buildFilter(query);
-
-    // Members can only see tasks in projects they're part of
-    if (user.role !== UserRole.ADMIN) {
-      const userProjects = await this.projectModel
-        .find({
-          $or: [{ owner: user._id }, { members: user._id }],
-          isDeleted: false,
-        })
-        .select("_id");
-      filter.project = { $in: userProjects.map((p) => p._id) };
-    }
 
     const total = await this.taskModel.countDocuments(filter);
     const pagination = getPaginationMetadata(page, limit, total);
@@ -128,18 +117,13 @@ export class TasksService {
     };
   }
 
-  async findByProject(
-    projectId: string,
-    query: TaskQueryDto,
-    user: UserDocument,
-  ) {
+  async findByProject(projectId: string, query: TaskQueryDto) {
     const project = await this.projectModel.findOne({
       _id: projectId,
       isDeleted: false,
     });
     if (!project) throw new NotFoundException("Project not found");
-    this.checkProjectAccess(project, user);
-
+    this.checkProjectAccess();
     const { page, limit } = query;
     const filter = this.buildFilter(query);
     filter.project = new Types.ObjectId(projectId);
@@ -168,7 +152,7 @@ export class TasksService {
     };
   }
 
-  async findOne(id: string, user: UserDocument) {
+  async findOne(id: string) {
     const task = await this.taskModel
       .findOne({ _id: id, isDeleted: false })
       .populate("project", "name members owner")
@@ -177,8 +161,7 @@ export class TasksService {
 
     if (!task) throw new NotFoundException("Task not found");
 
-    const project = task.project as unknown as ProjectDocument;
-    this.checkProjectAccess(project, user);
+    this.checkProjectAccess();
 
     return { data: task };
   }
@@ -189,7 +172,12 @@ export class TasksService {
       .populate("project");
 
     if (!task) throw new NotFoundException("Task not found");
-    this.checkProjectAccess(task.project as unknown as ProjectDocument, user);
+    this.checkProjectAccess();
+
+    // Only admins can change the assignedTo field
+    if (dto.assignedTo !== undefined && user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException("Only admins can assign or reassign tasks");
+    }
 
     const updated = await this.taskModel
       .findByIdAndUpdate(id, { $set: dto }, { new: true })
@@ -206,7 +194,7 @@ export class TasksService {
       .populate("project");
 
     if (!task) throw new NotFoundException("Task not found");
-    this.checkProjectAccess(task.project as unknown as ProjectDocument, user);
+    this.checkProjectAccess();
 
     const { status: newStatus } = dto;
     const currentStatus = task.status;
@@ -235,28 +223,20 @@ export class TasksService {
     return { message: `Task moved to ${newStatus}`, data: task };
   }
 
-  async remove(id: string, user: UserDocument) {
+  async remove(id: string) {
     const task = await this.taskModel
       .findOne({ _id: id, isDeleted: false })
       .populate("project");
 
     if (!task) throw new NotFoundException("Task not found");
-    this.checkProjectAccess(task.project as unknown as ProjectDocument, user);
+    this.checkProjectAccess();
 
     await this.taskModel.findByIdAndUpdate(id, { $set: { isDeleted: true } });
     return { message: "Task deleted successfully" };
   }
 
-  private checkProjectAccess(project: ProjectDocument, user: UserDocument) {
-    if (user.role === UserRole.ADMIN) return;
-
-    const isOwner = getRefId(project.owner) === user._id.toString();
-    const isMember = project.members?.some(
-      (m) => getRefId(m) === user._id.toString(),
-    );
-
-    if (!isOwner && !isMember) {
-      throw new ForbiddenException("You do not have access to this project");
-    }
+  private checkProjectAccess() {
+    // All projects are public to all users in the system
+    return;
   }
 }
