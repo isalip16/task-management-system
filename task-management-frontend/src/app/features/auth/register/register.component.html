@@ -1,6 +1,5 @@
 <div class="auth-card">
   <div class="auth-header">
-    <span class="brand-badge">❖</span>
     <h2 class="auth-title">Create Account</h2>
     <p class="auth-subtitle">Start managing your projects today</p>
   </div>
@@ -46,12 +45,17 @@
 
     <div class="form-group">
       <label for="password">Password</label>
-      <input 
-        type="password" 
-        id="password" 
-        formControlName="password" 
-        placeholder="Min. 8 characters"
-        [class.is-invalid]="f['password'].touched && f['password'].invalid" />
+      <div class="password-wrapper">
+        <input 
+          [type]="showPassword ? 'text' : 'password'" 
+          id="password" 
+          formControlName="password" 
+          placeholder="Min. 8 characters"
+          [class.is-invalid]="f['password'].touched && f['password'].invalid" />
+        <button type="button" class="btn-toggle-password" (click)="togglePasswordVisibility()" tabIndex="-1">
+          <span class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+        </button>
+      </div>
       @if (f['password'].touched && f['password'].errors) {
         <span class="error-msg">
           @if (f['password'].errors['required']) { Password is required }

@@ -82,3 +82,39 @@
     }
   }
 }
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    padding-right: 44px;
+  }
+
+  .btn-toggle-password {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    outline: none;
+
+    &:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .material-icons {
+      font-size: 20px;
+    }
+  }
+}

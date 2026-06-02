@@ -19,6 +19,11 @@ export class Register implements OnInit {
   registerForm!: FormGroup;
   isLoading = false;
   errorMessage = '';
+  showPassword = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   constructor(
     private fb: FormBuilder,

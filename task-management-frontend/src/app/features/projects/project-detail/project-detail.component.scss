@@ -8,7 +8,8 @@
   display: flex;
   gap: 12px;
 
-  button, a {
+  button,
+  a {
     height: 40px;
     align-items: center;
     justify-content: center;
@@ -74,7 +75,7 @@
   }
 }
 
-// Kanban Section
+// Task Board Section
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -140,9 +141,17 @@
     border-radius: 12px;
   }
 
-  &.col-todo { border-bottom-color: var(--status-todo-text); }
-  &.col-inprogress { border-bottom-color: #d97706; }
-  &.col-done { border-bottom-color: #16a34a; }
+  &.col-todo {
+    border-bottom-color: var(--status-todo-text);
+  }
+
+  &.col-inprogress {
+    border-bottom-color: #d97706;
+  }
+
+  &.col-done {
+    border-bottom-color: #16a34a;
+  }
 }
 
 .task-list-container {
