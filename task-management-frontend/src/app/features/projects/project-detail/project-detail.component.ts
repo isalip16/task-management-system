@@ -137,6 +137,10 @@ export class ProjectDetail implements OnInit {
     return ownerId === this.currentUser._id;
   }
 
+  get isAdmin(): boolean {
+    return this.currentUser?.role === 'admin';
+  }
+
   deleteProject() {
     if (!confirm('Are you sure you want to delete this project? All associated tasks will be permanently removed.')) return;
 

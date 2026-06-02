@@ -34,8 +34,8 @@ export class TasksController {
 
   // GET /tasks?status=TODO&search=bug&page=1
   @Get()
-  findAll(@Query() query: TaskQueryDto, @CurrentUser() user: UserDocument) {
-    return this.tasksService.findAll(query, user);
+  findAll(@Query() query: TaskQueryDto) {
+    return this.tasksService.findAll(query);
   }
 
   // GET /tasks/project/:projectId — all tasks for a specific project
@@ -43,9 +43,8 @@ export class TasksController {
   findByProject(
     @Param("projectId") projectId: string,
     @Query() query: TaskQueryDto,
-    @CurrentUser() user: UserDocument,
   ) {
-    return this.tasksService.findByProject(projectId, query, user);
+    return this.tasksService.findByProject(projectId, query);
   }
 
   // GET /tasks/project/:projectId/logs — activity logs for a project
@@ -59,8 +58,8 @@ export class TasksController {
 
   // GET /tasks/:id
   @Get(":id")
-  findOne(@Param("id") id: string, @CurrentUser() user: UserDocument) {
-    return this.tasksService.findOne(id, user);
+  findOne(@Param("id") id: string) {
+    return this.tasksService.findOne(id);
   }
 
   // PATCH /tasks/:id
@@ -85,7 +84,7 @@ export class TasksController {
 
   // DELETE /tasks/:id
   @Delete(":id")
-  remove(@Param("id") id: string, @CurrentUser() user: UserDocument) {
-    return this.tasksService.remove(id, user);
+  remove(@Param("id") id: string) {
+    return this.tasksService.remove(id);
   }
 }

@@ -22,9 +22,8 @@ export class UsersController {
     return { data: user };
   }
 
-  // GET /users — only admins can list all users
+  // GET /users — list all users
   @Get()
-  @Roles(UserRole.ADMIN)
   findAll(@Query() query: { search?: string; page?: string; limit?: string }) {
     return this.usersService.findAll(query);
   }

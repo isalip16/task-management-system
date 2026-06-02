@@ -84,9 +84,11 @@
               <a [routerLink]="['/projects', project._id]" class="btn-primary btn-action">
                 View
               </a>
+              @if (canEdit(project)) {
               <a [routerLink]="['/projects', project._id, 'edit']" class="btn-secondary btn-action">
                 Edit
               </a>
+              }
             </div>
           </div>
         }
