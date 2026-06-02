@@ -18,6 +18,7 @@ import {
   UpdateProjectDto,
   AddMemberDto,
 } from "./dto/project.dto";
+import { getRefId, getPaginationMetadata } from "../common/utils/db-helpers";
 
 @Injectable()
 export class ProjectsService {
@@ -44,11 +45,7 @@ export class ProjectsService {
     query: { search?: string; status?: string; page?: string; limit?: string },
     user: UserDocument,
   ) {
-    const { search, status, page = "1", limit = "10" } = query;
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
-    const skip = (pageNum - 1) * limitNum;
-
+    const { search, status, page, limit } = query;
     const filter: QueryFilter<ProjectDocument> = { isDeleted: false };
 
     // Admins see all projects; members only see projects they're part of
@@ -64,25 +61,25 @@ export class ProjectsService {
       filter.name = { $regex: search, $options: "i" };
     }
 
-    const [projects, total] = await Promise.all([
-      this.projectModel
-        .find(filter)
-        .populate("owner", "name email")
-        .populate("members", "name email")
-        .skip(skip)
-        .limit(limitNum)
-        .sort({ createdAt: -1 }),
-      this.projectModel.countDocuments(filter),
-    ]);
+    const total = await this.projectModel.countDocuments(filter);
+    const pagination = getPaginationMetadata(page, limit, total);
+
+    const projects = await this.projectModel
+      .find(filter)
+      .populate("owner", "name email")
+      .populate("members", "name email")
+      .skip(pagination.skip)
+      .limit(pagination.limit)
+      .sort({ createdAt: -1 });
 
     return {
       data: {
         projects,
         pagination: {
-          page: pageNum,
-          limit: limitNum,
+          page: pagination.page,
+          limit: pagination.limit,
           total,
-          totalPages: Math.ceil(total / limitNum),
+          totalPages: pagination.totalPages,
         },
       },
     };
@@ -109,7 +106,7 @@ export class ProjectsService {
 
     // Only owner or admin can update a project
     if (
-      this.getRefId(project.owner) !== user._id.toString() &&
+      getRefId(project.owner) !== user._id.toString() &&
       user.role !== UserRole.ADMIN
     ) {
       throw new ForbiddenException(
@@ -133,7 +130,7 @@ export class ProjectsService {
     if (!project) throw new NotFoundException("Project not found");
 
     if (
-      this.getRefId(project.owner) !== user._id.toString() &&
+      getRefId(project.owner) !== user._id.toString() &&
       user.role !== UserRole.ADMIN
     ) {
       throw new ForbiddenException(
@@ -161,7 +158,7 @@ export class ProjectsService {
     if (!project) throw new NotFoundException("Project not found");
 
     if (
-      this.getRefId(project.owner) !== user._id.toString() &&
+      getRefId(project.owner) !== user._id.toString() &&
       user.role !== UserRole.ADMIN
     ) {
       throw new ForbiddenException("Only the owner can add members");
@@ -175,7 +172,7 @@ export class ProjectsService {
 
     const memberId = new Types.ObjectId(dto.userId);
     const alreadyMember = project.members.some(
-      (m) => this.getRefId(m) === dto.userId,
+      (m) => getRefId(m) === dto.userId,
     );
     if (alreadyMember) {
       throw new BadRequestException("User is already a member of this project");
@@ -196,13 +193,13 @@ export class ProjectsService {
     if (!project) throw new NotFoundException("Project not found");
 
     if (
-      this.getRefId(project.owner) !== user._id.toString() &&
+      getRefId(project.owner) !== user._id.toString() &&
       user.role !== UserRole.ADMIN
     ) {
       throw new ForbiddenException("Only the owner can remove members");
     }
 
-    if (memberId === this.getRefId(project.owner)) {
+    if (memberId === getRefId(project.owner)) {
       throw new BadRequestException("Cannot remove the project owner");
     }
 
@@ -291,21 +288,10 @@ export class ProjectsService {
   private checkAccess(project: ProjectDocument, user: UserDocument) {
     if (user.role === UserRole.ADMIN) return;
     const hasAccess =
-      this.getRefId(project.owner) === user._id.toString() ||
-      project.members.some((m) => this.getRefId(m) === user._id.toString());
+      getRefId(project.owner) === user._id.toString() ||
+      project.members.some((m) => getRefId(m) === user._id.toString());
     if (!hasAccess) {
       throw new ForbiddenException("You are not a member of this project");
     }
-  }
-
-  private getRefId(ref: Types.ObjectId | User): string {
-    if (ref instanceof Types.ObjectId) {
-      return ref.toHexString();
-    }
-    const id = (ref as UserDocument)._id;
-    if (id instanceof Types.ObjectId) {
-      return id.toHexString();
-    }
-    return String(id || "");
   }
 }

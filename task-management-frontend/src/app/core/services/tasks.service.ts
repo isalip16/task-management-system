@@ -11,31 +11,30 @@ export class TasksService {
   constructor(private http: HttpClient) {}
 
   getAll(filters?: TaskFilters): Observable<ApiResponse<any>> {
-    let params = new HttpParams();
-
-    if (filters?.status)     params = params.set('status', filters.status);
-    if (filters?.priority)   params = params.set('priority', filters.priority);
-    if (filters?.assignedTo) params = params.set('assignedTo', filters.assignedTo);
-    if (filters?.search)     params = params.set('search', filters.search);
-    if (filters?.page)       params = params.set('page', filters.page.toString());
-    if (filters?.limit)      params = params.set('limit', filters.limit.toString());
-
+    const params = this.buildHttpParams(filters);
     return this.http.get<ApiResponse<any>>(this.apiUrl, { params });
   }
 
   getByProject(projectId: string, filters?: TaskFilters): Observable<ApiResponse<any>> {
-    let params = new HttpParams();
-
-    if (filters?.status)   params = params.set('status', filters.status);
-    if (filters?.priority) params = params.set('priority', filters.priority);
-    if (filters?.search)   params = params.set('search', filters.search);
-    if (filters?.page)     params = params.set('page', filters.page.toString());
-    if (filters?.limit)    params = params.set('limit', filters.limit.toString());
-
+    const params = this.buildHttpParams(filters);
     return this.http.get<ApiResponse<any>>(
       `${this.apiUrl}/project/${projectId}`,
       { params }
     );
+  }
+
+  private buildHttpParams(filters?: TaskFilters): HttpParams {
+    let params = new HttpParams();
+    if (!filters) return params;
+
+    if (filters.status)     params = params.set('status', filters.status);
+    if (filters.priority)   params = params.set('priority', filters.priority);
+    if (filters.assignedTo) params = params.set('assignedTo', filters.assignedTo);
+    if (filters.search)     params = params.set('search', filters.search);
+    if (filters.page)       params = params.set('page', filters.page.toString());
+    if (filters.limit)      params = params.set('limit', filters.limit.toString());
+
+    return params;
   }
 
   getOne(id: string): Observable<ApiResponse<Task>> {

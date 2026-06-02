@@ -198,3 +198,224 @@ h1, h2, h3, h4, h5, h6 {
     margin-right: 4px;
   }
 }
+
+// Global Reusable Layout and Component styles for Cleanup
+
+// Status Badges
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+
+  &.status-todo, &.status-TODO, &.log-status-TODO {
+    background-color: var(--status-todo-bg);
+    color: var(--status-todo-text);
+  }
+
+  &.status-inprogress, &.status-IN_PROGRESS, &.log-status-IN_PROGRESS {
+    background-color: var(--status-inprogress-bg);
+    color: var(--status-inprogress-text);
+  }
+
+  &.status-done, &.status-DONE, &.log-status-DONE {
+    background-color: var(--status-done-bg);
+    color: var(--status-done-text);
+  }
+}
+
+// Priority Badges
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+
+  &.priority-low {
+    background-color: var(--priority-low-bg);
+    color: var(--priority-low-text);
+  }
+
+  &.priority-medium {
+    background-color: var(--priority-medium-bg);
+    color: var(--priority-medium-text);
+  }
+
+  &.priority-high {
+    background-color: var(--priority-high-bg);
+    color: var(--priority-high-text);
+  }
+}
+
+// Pagination Controls
+.pagination-container, .pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background-color: var(--bg-card);
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  width: fit-content;
+  margin: 12px auto 0;
+  box-shadow: var(--shadow-sm);
+
+  .btn-pagination, .page-btn {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 6px 12px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-main);
+
+    &:hover:not(:disabled) {
+      background-color: var(--bg-app);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .pagination-info, .page-info {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+}
+
+// Empty State Cards
+.empty-state-card, .empty-state {
+  background-color: var(--bg-card);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 500px;
+  margin: 24px auto;
+  gap: 16px;
+
+  .empty-icon-wrapper, .empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    font-family: var(--font-brand);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// Search & Filter Bar
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--bg-card);
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .search-field, .search-input {
+    flex: 1;
+    min-width: 260px;
+  }
+
+  .filter-field, .filter-select {
+    width: 200px;
+    min-width: 150px;
+  }
+
+  .search-input, .filter-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    outline: none;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+
+    &:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+  }
+
+  .btn-clear {
+    align-self: center;
+    height: 42px;
+    padding: 10px 16px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--bg-app);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .filter-field, .filter-select {
+      width: 100%;
+    }
+  }
+}
