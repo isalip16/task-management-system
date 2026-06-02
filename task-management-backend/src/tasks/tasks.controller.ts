@@ -7,7 +7,6 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
 } from "@nestjs/common";
 import { TasksService } from "./tasks.service";
 import { ActivityLogsService } from "../activity-logs/activity-logs.service";
@@ -17,13 +16,10 @@ import {
   UpdateTaskStatusDto,
   TaskQueryDto,
 } from "./dto/task.dto";
-import { JwtAuthGuard } from "../common/guards/auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { UserDocument } from "../users/schemas/user.schema";
 
 @Controller("tasks")
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class TasksController {
   constructor(
     private readonly tasksService: TasksService,

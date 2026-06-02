@@ -6,17 +6,13 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
 } from "@nestjs/common";
 import { UsersService, UpdateUserDto } from "./users.service";
-import { JwtAuthGuard } from "../common/guards/auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { UserRole, UserDocument } from "./schemas/user.schema";
 
 @Controller("users")
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
