@@ -23,7 +23,7 @@ export class UsersController {
   // GET /users/profile — get the currently logged-in user's profile
   @Get("profile")
   getProfile(@CurrentUser() user: UserDocument) {
-    return this.usersService.getProfile(user._id.toString());
+    return { data: user };
   }
 
   // GET /users — only admins can list all users

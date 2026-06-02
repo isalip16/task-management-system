@@ -8,6 +8,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, QueryFilter } from "mongoose";
 import * as bcrypt from "bcryptjs";
 import { User, UserDocument, UserRole } from "./schemas/user.schema";
+import { getPaginationMetadata } from "../common/utils/db-helpers";
 
 export class UpdateUserDto {
   name?: string;
@@ -21,11 +22,7 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findAll(query: { search?: string; page?: string; limit?: string }) {
-    const { search, page = "1", limit = "10" } = query;
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
-    const skip = (pageNum - 1) * limitNum;
-
+    const { search, page, limit } = query;
     const filter: QueryFilter<UserDocument> = { isDeleted: false };
 
     if (search) {
@@ -35,24 +32,23 @@ export class UsersService {
       ];
     }
 
-    // countDocuments for the total (for pagination metadata)
-    const [users, total] = await Promise.all([
-      this.userModel
-        .find(filter)
-        .skip(skip)
-        .limit(limitNum)
-        .sort({ createdAt: -1 }),
-      this.userModel.countDocuments(filter),
-    ]);
+    const total = await this.userModel.countDocuments(filter);
+    const pagination = getPaginationMetadata(page, limit, total);
+
+    const users = await this.userModel
+      .find(filter)
+      .skip(pagination.skip)
+      .limit(pagination.limit)
+      .sort({ createdAt: -1 });
 
     return {
       data: {
         users,
         pagination: {
-          page: pageNum,
-          limit: limitNum,
+          page: pagination.page,
+          limit: pagination.limit,
           total,
-          totalPages: Math.ceil(total / limitNum),
+          totalPages: pagination.totalPages,
         },
       },
     };
@@ -110,14 +106,5 @@ export class UsersService {
 
     if (!user) throw new NotFoundException("User not found");
     return { message: "User deleted successfully" };
-  }
-
-  async getProfile(userId: string) {
-    const user = await this.userModel.findOne({
-      _id: userId,
-      isDeleted: false,
-    });
-    if (!user) throw new NotFoundException("User not found");
-    return { data: user };
   }
 }

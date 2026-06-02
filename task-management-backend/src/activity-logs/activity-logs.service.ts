@@ -5,6 +5,7 @@ import {
   ActivityLog,
   ActivityLogDocument,
 } from "./schemas/activity-log.schema";
+import { getPaginationMetadata } from "../common/utils/db-helpers";
 import { TaskStatus } from "../tasks/schemas/task.schema";
 
 @Injectable()
@@ -45,31 +46,28 @@ export class ActivityLogsService {
     projectId: string,
     query: { page?: string; limit?: string },
   ) {
-    const page = Math.max(1, parseInt(query.page || "1"));
-    const limit = Math.min(50, Math.max(1, parseInt(query.limit || "20")));
-    const skip = (page - 1) * limit;
+    const { page, limit } = query;
+    const total = await this.activityLogModel.countDocuments({
+      project: new Types.ObjectId(projectId),
+    });
+    const pagination = getPaginationMetadata(page, limit || "20", total);
 
-    const [logs, total] = await Promise.all([
-      this.activityLogModel
-        .find({ project: new Types.ObjectId(projectId) })
-        .populate("changedBy", "name email") // join User data: only return name and email
-        .populate("task", "title") // join Task data: only return title
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      this.activityLogModel.countDocuments({
-        project: new Types.ObjectId(projectId),
-      }),
-    ]);
+    const logs = await this.activityLogModel
+      .find({ project: new Types.ObjectId(projectId) })
+      .populate("changedBy", "name email") // join User data: only return name and email
+      .populate("task", "title") // join Task data: only return title
+      .sort({ createdAt: -1 })
+      .skip(pagination.skip)
+      .limit(pagination.limit);
 
     return {
       data: {
         logs,
         pagination: {
-          page,
-          limit,
+          page: pagination.page,
+          limit: pagination.limit,
           total,
-          totalPages: Math.ceil(total / limit),
+          totalPages: pagination.totalPages,
         },
       },
     };

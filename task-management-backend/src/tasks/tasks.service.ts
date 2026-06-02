@@ -8,7 +8,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types, QueryFilter } from "mongoose";
 import { Task, TaskDocument, TaskStatus } from "./schemas/task.schema";
 import { Project, ProjectDocument } from "../projects/schemas/project.schema";
-import { User, UserDocument, UserRole } from "../users/schemas/user.schema";
+import { UserDocument, UserRole } from "../users/schemas/user.schema";
 import { ActivityLogsService } from "../activity-logs/activity-logs.service";
 import {
   CreateTaskDto,
@@ -16,6 +16,7 @@ import {
   UpdateTaskStatusDto,
   TaskQueryDto,
 } from "./dto/task.dto";
+import { getRefId, getPaginationMetadata } from "../common/utils/db-helpers";
 
 // Define which status transitions are allowed.
 // TODO can go to IN_PROGRESS. IN_PROGRESS can go to DONE or back to TODO. DONE can go back to IN_PROGRESS.
@@ -71,20 +72,25 @@ export class TasksService {
     return { message: "Task created successfully", data: populated };
   }
 
-  async findAll(query: TaskQueryDto, user: UserDocument) {
-    const {
-      status,
-      priority,
-      assignedTo,
-      search,
-      page = "1",
-      limit = "10",
-    } = query;
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
-    const skip = (pageNum - 1) * limitNum;
-
+  private buildFilter(query: TaskQueryDto): QueryFilter<TaskDocument> {
+    const { status, priority, assignedTo, search } = query;
     const filter: QueryFilter<TaskDocument> = { isDeleted: false };
+
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+    if (assignedTo) filter.assignedTo = new Types.ObjectId(assignedTo);
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+    return filter;
+  }
+
+  async findAll(query: TaskQueryDto, user: UserDocument) {
+    const { page, limit } = query;
+    const filter = this.buildFilter(query);
 
     // Members can only see tasks in projects they're part of
     if (user.role !== UserRole.ADMIN) {
@@ -97,36 +103,26 @@ export class TasksService {
       filter.project = { $in: userProjects.map((p) => p._id) };
     }
 
-    if (status) filter.status = status;
-    if (priority) filter.priority = priority;
-    if (assignedTo) filter.assignedTo = new Types.ObjectId(assignedTo);
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
+    const total = await this.taskModel.countDocuments(filter);
+    const pagination = getPaginationMetadata(page, limit, total);
 
-    const [tasks, total] = await Promise.all([
-      this.taskModel
-        .find(filter)
-        .populate("project", "name")
-        .populate("createdBy", "name email")
-        .populate("assignedTo", "name email")
-        .skip(skip)
-        .limit(limitNum)
-        .sort({ createdAt: -1 }),
-      this.taskModel.countDocuments(filter),
-    ]);
+    const tasks = await this.taskModel
+      .find(filter)
+      .populate("project", "name")
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email")
+      .skip(pagination.skip)
+      .limit(pagination.limit)
+      .sort({ createdAt: -1 });
 
     return {
       data: {
         tasks,
         pagination: {
-          page: pageNum,
-          limit: limitNum,
+          page: pagination.page,
+          limit: pagination.limit,
           total,
-          totalPages: Math.ceil(total / limitNum),
+          totalPages: pagination.totalPages,
         },
       },
     };
@@ -144,52 +140,29 @@ export class TasksService {
     if (!project) throw new NotFoundException("Project not found");
     this.checkProjectAccess(project, user);
 
-    const {
-      status,
-      priority,
-      assignedTo,
-      search,
-      page = "1",
-      limit = "10",
-    } = query;
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
-    const skip = (pageNum - 1) * limitNum;
+    const { page, limit } = query;
+    const filter = this.buildFilter(query);
+    filter.project = new Types.ObjectId(projectId);
 
-    const filter: QueryFilter<TaskDocument> = {
-      project: new Types.ObjectId(projectId),
-      isDeleted: false,
-    };
+    const total = await this.taskModel.countDocuments(filter);
+    const pagination = getPaginationMetadata(page, limit, total);
 
-    if (status) filter.status = status;
-    if (priority) filter.priority = priority;
-    if (assignedTo) filter.assignedTo = new Types.ObjectId(assignedTo);
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    const [tasks, total] = await Promise.all([
-      this.taskModel
-        .find(filter)
-        .populate("createdBy", "name email")
-        .populate("assignedTo", "name email")
-        .skip(skip)
-        .limit(limitNum)
-        .sort({ createdAt: -1 }),
-      this.taskModel.countDocuments(filter),
-    ]);
+    const tasks = await this.taskModel
+      .find(filter)
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email")
+      .skip(pagination.skip)
+      .limit(pagination.limit)
+      .sort({ createdAt: -1 });
 
     return {
       data: {
         tasks,
         pagination: {
-          page: pageNum,
-          limit: limitNum,
+          page: pagination.page,
+          limit: pagination.limit,
           total,
-          totalPages: Math.ceil(total / limitNum),
+          totalPages: pagination.totalPages,
         },
       },
     };
@@ -277,24 +250,13 @@ export class TasksService {
   private checkProjectAccess(project: ProjectDocument, user: UserDocument) {
     if (user.role === UserRole.ADMIN) return;
 
-    const isOwner = this.getRefId(project.owner) === user._id.toString();
+    const isOwner = getRefId(project.owner) === user._id.toString();
     const isMember = project.members?.some(
-      (m) => this.getRefId(m) === user._id.toString(),
+      (m) => getRefId(m) === user._id.toString(),
     );
 
     if (!isOwner && !isMember) {
       throw new ForbiddenException("You do not have access to this project");
     }
-  }
-
-  private getRefId(ref: Types.ObjectId | User): string {
-    if (ref instanceof Types.ObjectId) {
-      return ref.toHexString();
-    }
-    const id = (ref as UserDocument)._id;
-    if (id instanceof Types.ObjectId) {
-      return id.toHexString();
-    }
-    return String(id || "");
   }
 }
