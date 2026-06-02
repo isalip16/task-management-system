@@ -7,7 +7,6 @@ import {
   Param,
   Body,
   Query,
-  UseGuards,
 } from "@nestjs/common";
 import { ProjectsService } from "./projects.service";
 import {
@@ -15,13 +14,10 @@ import {
   UpdateProjectDto,
   AddMemberDto,
 } from "./dto/project.dto";
-import { JwtAuthGuard } from "../common/guards/auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { UserDocument } from "../users/schemas/user.schema";
 
 @Controller("projects")
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
