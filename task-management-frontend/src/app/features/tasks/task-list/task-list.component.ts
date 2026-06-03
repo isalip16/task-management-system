@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,13 +14,14 @@ import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skel
   imports: [CommonModule, RouterLink, FormsModule, PageHeaderComponent, SkeletonLoaderComponent],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskList implements OnInit {
-  tasks: Task[] = [];
-  projects: Project[] = [];
+  tasks = signal<Task[]>([]);
+  projects = signal<Project[]>([]);
 
-  isLoading = true;
-  errorMessage = '';
+  isLoading = signal(true);
+  errorMessage = signal('');
 
   // Filters — bound to dropdowns and search input
   searchTerm = '';
@@ -29,9 +30,9 @@ export class TaskList implements OnInit {
   selectedProjectId = '';
 
   // Pagination
-  currentPage = 1;
-  totalPages = 1;
-  totalTasks = 0;
+  currentPage = signal(1);
+  totalPages = signal(1);
+  totalTasks = signal(0);
   limit = 10;
 
   // Expose enums to template
@@ -56,7 +57,6 @@ export class TaskList implements OnInit {
     private tasksService: TasksService,
     private projectsService: ProjectsService,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -72,14 +72,14 @@ export class TaskList implements OnInit {
   }
 
   loadTasks() {
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     const filters = {
       search: this.searchTerm || undefined,
       status: (this.selectedStatus as TaskStatus) || undefined,
       priority: (this.selectedPriority as TaskPriority) || undefined,
-      page: this.currentPage,
+      page: this.currentPage(),
       limit: this.limit,
     };
 
@@ -89,16 +89,14 @@ export class TaskList implements OnInit {
 
     request$.subscribe({
       next: (response) => {
-        this.tasks = response.data.tasks;
-        this.totalPages = response.data.pagination.totalPages;
-        this.totalTasks = response.data.pagination.total;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.tasks.set(response.data.tasks);
+        this.totalPages.set(response.data.pagination.totalPages);
+        this.totalTasks.set(response.data.pagination.total);
+        this.isLoading.set(false);
       },
       error: () => {
-        this.errorMessage = 'Failed to load tasks.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load tasks.');
+        this.isLoading.set(false);
       },
     });
   }
@@ -106,20 +104,19 @@ export class TaskList implements OnInit {
   loadProjects() {
     this.projectsService.getAll({ limit: 100 }).subscribe({
       next: (response) => {
-        this.projects = response.data.projects;
-        this.cdr.detectChanges();
+        this.projects.set(response.data.projects);
       },
       error: () => {},
     });
   }
 
   onSearch() {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadTasks();
   }
 
   onFilterChange() {
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadTasks();
   }
 
@@ -128,13 +125,13 @@ export class TaskList implements OnInit {
     this.selectedStatus = '';
     this.selectedPriority = '';
     this.selectedProjectId = '';
-    this.currentPage = 1;
+    this.currentPage.set(1);
     this.loadTasks();
   }
 
   goToPage(page: number) {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
     this.loadTasks();
   }
 
@@ -143,11 +140,15 @@ export class TaskList implements OnInit {
     this.tasksService.updateStatus(task._id, newStatus).subscribe({
       next: (response) => {
         // Update the task in the local array without re-fetching everything
-        const index = this.tasks.findIndex((t) => t._id === task._id);
-        if (index !== -1) {
-          this.tasks[index] = response.data;
-        }
-        this.cdr.detectChanges();
+        this.tasks.update(tasks => {
+          const index = tasks.findIndex((t) => t._id === task._id);
+          if (index !== -1) {
+            const updated = [...tasks];
+            updated[index] = response.data;
+            return updated;
+          }
+          return tasks;
+        });
       },
       error: (err) => {
         alert(err.error?.message || 'Failed to update status.');
@@ -161,9 +162,8 @@ export class TaskList implements OnInit {
     this.tasksService.delete(task._id).subscribe({
       next: () => {
         // Remove from local array immediately — no need to re-fetch
-        this.tasks = this.tasks.filter((t) => t._id !== task._id);
-        this.totalTasks--;
-        this.cdr.detectChanges();
+        this.tasks.update(tasks => tasks.filter((t) => t._id !== task._id));
+        this.totalTasks.update(t => t - 1);
       },
       error: () => alert('Failed to delete task.'),
     });

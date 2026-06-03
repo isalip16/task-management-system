@@ -12,18 +12,18 @@
       </p>
     </div>
 
-    @if (isLoadingData) {
+    @if (isLoadingData()) {
       <div class="loading-msg">Loading...</div>
     }
 
-    @if (!isLoadingData) {
+    @if (!isLoadingData()) {
 
       <!-- Status section (edit mode only) -->
       @if (isEditMode) {
         <div class="status-section">
           <span class="current-status-label">Current Status:</span>
-          <span class="status-badge" [class]="'status-' + currentStatus">
-            {{ currentStatus === 'IN_PROGRESS' ? 'In Progress' : currentStatus === 'TODO' ? 'To Do' : 'Done' }}
+          <span class="status-badge" [class]="'status-' + currentStatus()">
+            {{ currentStatus() === 'IN_PROGRESS' ? 'In Progress' : currentStatus() === 'TODO' ? 'To Do' : 'Done' }}
           </span>
 
           @if (availableStatuses.length > 0) {
@@ -75,10 +75,10 @@
             <label>Project <span class="required">*</span></label>
             <select
               formControlName="projectId"
-              [class.is-invalid]="f['projectId'].touched && f['projectId'].errors"
+              [class.is-invalid]="f['projectId'].touched && f['projectId'].invalid"
             >
               <option value="">Select a project</option>
-              @for (project of projects; track project._id) {
+              @for (project of projects(); track project._id) {
                 <option [value]="project._id">{{ project.name }}</option>
               }
             </select>
@@ -102,7 +102,7 @@
             <label>Assign To</label>
             <select formControlName="assignedTo">
               <option value="">Unassigned</option>
-              @for (user of users; track user._id) {
+              @for (user of users(); track user._id) {
                 <option [value]="user._id">{{ user.name }}</option>
               }
             </select>
@@ -114,16 +114,16 @@
           </div>
         </div>
 
-        @if (errorMessage) {
-          <div class="alert-error">{{ errorMessage }}</div>
+        @if (errorMessage()) {
+          <div class="alert-error">{{ errorMessage() }}</div>
         }
 
         <div class="form-actions">
           <button type="button" class="btn-cancel" (click)="goBack()">
             Cancel
           </button>
-          <button type="submit" class="btn-primary" [disabled]="isLoading">
-            {{ isLoading ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Task') }}
+          <button type="submit" class="btn-primary" [disabled]="isLoading()">
+            {{ isLoading() ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Task') }}
           </button>
         </div>
 

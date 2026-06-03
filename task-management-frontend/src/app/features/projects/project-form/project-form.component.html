@@ -8,17 +8,17 @@
     </a>
   </app-page-header>
 
-  @if (isLoadingProject) {
+  @if (isLoadingProject()) {
     <div class="loading-state-card">
       <span>Loading project details...</span>
     </div>
   }
 
-  @if (!isLoadingProject) {
+  @if (!isLoadingProject()) {
     <div class="form-card">
-      @if (errorMessage) {
+      @if (errorMessage()) {
         <div class="alert-error">
-          <span>{{ errorMessage }}</span>
+          <span>{{ errorMessage() }}</span>
         </div>
       }
 
@@ -58,8 +58,8 @@
           <a [routerLink]="isEditMode ? ['/projects', projectId] : ['/projects']" class="btn-secondary btn-cancel">
             Cancel
           </a>
-          <button type="submit" class="btn-primary btn-submit" [disabled]="projectForm.invalid || isLoading">
-            {{ isLoading ? 'Saving...' : 'Save Project' }}
+          <button type="submit" class="btn-primary btn-submit" [disabled]="projectForm.invalid || isLoading()">
+            {{ isLoading() ? 'Saving...' : 'Save Project' }}
           </button>
         </div>
       </form>

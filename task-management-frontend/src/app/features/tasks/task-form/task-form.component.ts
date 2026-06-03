@@ -1,7 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { TasksService } from '@core/services/tasks.service';
 import { ProjectsService } from '@core/services/projects.service';
 import { UsersService } from '@core/services/users.service';
@@ -13,15 +13,16 @@ import { TaskStatus, TaskPriority, Project, User } from '@core/models';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './task-form.component.html',
   styleUrl: './task-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskForm implements OnInit {
   taskForm!: FormGroup;
-  projects: Project[] = [];
-  users: User[] = [];
+  projects = signal<Project[]>([]);
+  users = signal<User[]>([]);
 
-  isLoading = false;
-  isLoadingData = true;
-  errorMessage = '';
+  isLoading = signal(false);
+  isLoadingData = signal(true);
+  errorMessage = signal('');
 
   // Detect mode from URL
   // /tasks/new          → create mode (taskId is null)
@@ -42,7 +43,7 @@ export class TaskForm implements OnInit {
     [TaskStatus.DONE]: [TaskStatus.IN_PROGRESS],
   };
 
-  currentStatus: TaskStatus = TaskStatus.TODO;
+  currentStatus = signal<TaskStatus>(TaskStatus.TODO);
 
   get isEditMode(): boolean { return !!this.taskId; }
 
@@ -57,7 +58,6 @@ export class TaskForm implements OnInit {
     private usersService: UsersService,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -85,12 +85,12 @@ export class TaskForm implements OnInit {
   }
 
   loadFormData() {
-    this.isLoadingData = true;
+    this.isLoadingData.set(true);
 
     // Load projects for the dropdown
     this.projectsService.getAll({ limit: 100 }).subscribe({
       next: (res) => {
-        this.projects = res.data.projects;
+        this.projects.set(res.data.projects);
 
         // Pre-select project if ?projectId was in the URL
         if (this.preselectedProjectId) {
@@ -100,29 +100,26 @@ export class TaskForm implements OnInit {
         // Load users for assigned-to dropdown
         this.usersService.getAll({ limit: 100 }).subscribe({
           next: (userRes) => {
-            this.users = userRes.data.users;
+            this.users.set(userRes.data.users);
 
             // If edit mode, load the task data AFTER dropdowns are ready
             if (this.isEditMode) {
               this.loadTask();
             } else {
-              this.isLoadingData = false;
-              this.cdr.detectChanges();
+              this.isLoadingData.set(false);
             }
           },
           error: () => {
             if (this.isEditMode) this.loadTask();
             else {
-              this.isLoadingData = false;
-              this.cdr.detectChanges();
+              this.isLoadingData.set(false);
             }
           }
         });
       },
       error: () => {
-        this.isLoadingData = false;
-        this.errorMessage = 'Failed to load form data.';
-        this.cdr.detectChanges();
+        this.isLoadingData.set(false);
+        this.errorMessage.set('Failed to load form data.');
       }
     });
   }
@@ -131,7 +128,7 @@ export class TaskForm implements OnInit {
     this.tasksService.getOne(this.taskId!).subscribe({
       next: (response) => {
         const task = response.data;
-        this.currentStatus = task.status;
+        this.currentStatus.set(task.status);
 
         // patchValue fills only the fields we specify
         this.taskForm.patchValue({
@@ -151,13 +148,11 @@ export class TaskForm implements OnInit {
                          : '',
         });
 
-        this.isLoadingData = false;
-        this.cdr.detectChanges();
+        this.isLoadingData.set(false);
       },
       error: () => {
-        this.errorMessage = 'Failed to load task.';
-        this.isLoadingData = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load task.');
+        this.isLoadingData.set(false);
       }
     });
   }
@@ -166,7 +161,7 @@ export class TaskForm implements OnInit {
 
   // Returns the valid next statuses for the current task
   get availableStatuses(): TaskStatus[] {
-    return this.validTransitions[this.currentStatus] || [];
+    return this.validTransitions[this.currentStatus()] || [];
   }
 
   onSubmit() {
@@ -175,8 +170,8 @@ export class TaskForm implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     const formValue = this.taskForm.value;
 
@@ -194,7 +189,7 @@ export class TaskForm implements OnInit {
       : this.tasksService.create(payload);
 
     request$.subscribe({
-      next: (response) => {
+      next: () => {
         // Navigate back to the project detail if we know the project
         const projectId = formValue.projectId;
         if (projectId) {
@@ -204,9 +199,8 @@ export class TaskForm implements OnInit {
         }
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to save task.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set(err.error?.message || 'Failed to save task.');
+        this.isLoading.set(false);
       }
     });
   }
@@ -217,8 +211,7 @@ export class TaskForm implements OnInit {
 
     this.tasksService.updateStatus(this.taskId, newStatus).subscribe({
       next: (response) => {
-        this.currentStatus = response.data.status;
-        this.cdr.detectChanges();
+        this.currentStatus.set(response.data.status);
       },
       error: (err) => {
         alert(err.error?.message || 'Failed to update status.');
