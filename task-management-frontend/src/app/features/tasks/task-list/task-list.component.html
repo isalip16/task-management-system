@@ -1,7 +1,7 @@
 <div class="task-list">
 
   <!-- Header -->
-  <app-page-header [title]="'Tasks'" [subtitle]="totalTasks + ' task' + (totalTasks !== 1 ? 's' : '') + ' total'">
+  <app-page-header [title]="'Tasks'" [subtitle]="totalTasks() + ' task' + (totalTasks() !== 1 ? 's' : '') + ' total'">
     <a routerLink="/tasks/new" class="btn-primary">+ New Task</a>
   </app-page-header>
 
@@ -31,7 +31,7 @@
 
     <select [(ngModel)]="selectedProjectId" (change)="onFilterChange()" class="filter-select">
       <option value="">All Projects</option>
-      @for (project of projects; track project._id) {
+      @for (project of projects(); track project._id) {
         <option [value]="project._id">{{ project.name }}</option>
       }
     </select>
@@ -42,20 +42,20 @@
   </div>
 
   <!-- Loading -->
-  @if (isLoading) {
+  @if (isLoading()) {
     <app-skeleton-loader type="list" [count]="5"></app-skeleton-loader>
   }
 
   <!-- Error -->
-  @if (errorMessage && !isLoading) {
-    <div class="alert-error">{{ errorMessage }}</div>
+  @if (errorMessage() && !isLoading()) {
+    <div class="alert-error">{{ errorMessage() }}</div>
   }
 
   <!-- Task list -->
-  @if (!isLoading && !errorMessage) {
-    @if (tasks.length > 0) {
+  @if (!isLoading() && !errorMessage()) {
+    @if (tasks().length > 0) {
       <div class="task-rows">
-        @for (task of tasks; track task._id) {
+        @for (task of tasks(); track task._id) {
           <div class="task-row" [class.task-done]="task.status === TaskStatus.DONE">
 
             <!-- Left: status indicator + title -->
@@ -124,20 +124,20 @@
       </div>
 
       <!-- Pagination -->
-      @if (totalPages > 1) {
+      @if (totalPages() > 1) {
         <div class="pagination">
           <button
             class="page-btn"
-            [disabled]="currentPage === 1"
-            (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
           >
             ← Prev
           </button>
-          <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+          <span class="page-info">Page {{ currentPage() }} of {{ totalPages() }}</span>
           <button
             class="page-btn"
-            [disabled]="currentPage === totalPages"
-            (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
           >
             Next →
           </button>

@@ -2,33 +2,33 @@
   
   <app-page-header 
     title="Dashboard" 
-    [subtitle]="'Welcome back, ' + (currentUser?.name || 'there')">
+    [subtitle]="'Welcome back, ' + (currentUser()?.name || 'there')">
     <a routerLink="/projects" class="btn-primary">
       New Project
     </a>
   </app-page-header>
 
-  @if (errorMessage && !isLoading) {
+  @if (errorMessage() && !isLoading()) {
     <div class="alert-error">
-      <span>{{ errorMessage }}</span>
+      <span>{{ errorMessage() }}</span>
     </div>
   }
 
-  @if (isLoading) {
+  @if (isLoading()) {
     <app-skeleton-loader type="stats" [count]="4"></app-skeleton-loader>
     <div style="margin-top: 24px;">
       <app-skeleton-loader type="list" [count]="1"></app-skeleton-loader>
     </div>
   }
 
-  @if (stats && !isLoading) {
+  @if (stats() && !isLoading()) {
     <div class="stats-grid">
       
       <div class="stat-card stat-projects">
         <div class="stat-content">
           <div class="stat-icon-wrapper"><span class="material-icons">folder</span></div>
           <div class="stat-details">
-            <span class="stat-value">{{ stats.totalProjects }}</span>
+            <span class="stat-value">{{ stats()?.totalProjects }}</span>
             <span class="stat-label">Total Projects</span>
           </div>
         </div>
@@ -38,7 +38,7 @@
         <div class="stat-content">
           <div class="stat-icon-wrapper"><span class="material-icons">assignment</span></div>
           <div class="stat-details">
-            <span class="stat-value">{{ stats.tasks.total }}</span>
+            <span class="stat-value">{{ stats()?.tasks?.total }}</span>
             <span class="stat-label">Total Tasks</span>
           </div>
         </div>
@@ -48,7 +48,7 @@
         <div class="stat-content">
           <div class="stat-icon-wrapper"><span class="material-icons">flash_on</span></div>
           <div class="stat-details">
-            <span class="stat-value">{{ stats.tasks.IN_PROGRESS }}</span>
+            <span class="stat-value">{{ stats()?.tasks?.IN_PROGRESS }}</span>
             <span class="stat-label">In Progress</span>
           </div>
         </div>
@@ -58,7 +58,7 @@
         <div class="stat-content">
           <div class="stat-icon-wrapper"><span class="material-icons">check</span></div>
           <div class="stat-details">
-            <span class="stat-value">{{ stats.tasks.DONE }}</span>
+            <span class="stat-value">{{ stats()?.tasks?.DONE }}</span>
             <span class="stat-label">Completed</span>
           </div>
         </div>
@@ -75,10 +75,10 @@
           <div class="breakdown-info">
             <span class="status-indicator status-todo"></span>
             <span class="breakdown-label">To Do</span>
-            <span class="breakdown-count">{{ stats.tasks.TODO }}</span>
+            <span class="breakdown-count">{{ stats()?.tasks?.TODO }}</span>
           </div>
           <div class="progress-bar-container">
-            <div class="progress-bar progress-todo" [style.width.%]="stats.tasks.total > 0 ? (stats.tasks.TODO / stats.tasks.total) * 100 : 0"></div>
+            <div class="progress-bar progress-todo" [style.width.%]="stats()!.tasks.total > 0 ? (stats()!.tasks.TODO / stats()!.tasks.total) * 100 : 0"></div>
           </div>
         </div>
 
@@ -86,10 +86,10 @@
           <div class="breakdown-info">
             <span class="status-indicator status-inprogress"></span>
             <span class="breakdown-label">In Progress</span>
-            <span class="breakdown-count">{{ stats.tasks.IN_PROGRESS }}</span>
+            <span class="breakdown-count">{{ stats()?.tasks?.IN_PROGRESS }}</span>
           </div>
           <div class="progress-bar-container">
-            <div class="progress-bar progress-inprogress" [style.width.%]="stats.tasks.total > 0 ? (stats.tasks.IN_PROGRESS / stats.tasks.total) * 100 : 0"></div>
+            <div class="progress-bar progress-inprogress" [style.width.%]="stats()!.tasks.total > 0 ? (stats()!.tasks.IN_PROGRESS / stats()!.tasks.total) * 100 : 0"></div>
           </div>
         </div>
 
@@ -97,10 +97,10 @@
           <div class="breakdown-info">
             <span class="status-indicator status-done"></span>
             <span class="breakdown-label">Completed</span>
-            <span class="breakdown-count">{{ stats.tasks.DONE }}</span>
+            <span class="breakdown-count">{{ stats()?.tasks?.DONE }}</span>
           </div>
           <div class="progress-bar-container">
-            <div class="progress-bar progress-done" [style.width.%]="completionPercentage"></div>
+            <div class="progress-bar progress-done" [style.width.%]="completionPercentage()"></div>
           </div>
         </div>
 
@@ -108,7 +108,7 @@
 
         <div class="overall-completion">
           <span class="completion-text">Overall Project Completion</span>
-          <span class="completion-percentage">{{ completionPercentage }}%</span>
+          <span class="completion-percentage">{{ completionPercentage() }}%</span>
         </div>
       </div>
     </div>
@@ -124,7 +124,7 @@
     </div>
   }
 
-  @if (stats && stats.totalProjects === 0 && !isLoading) {
+  @if (stats() && stats()?.totalProjects === 0 && !isLoading()) {
     <div class="empty-state-card">
       <div class="empty-state-content">
         <div class="empty-icon-wrapper"><span class="material-icons" style="font-size: 48px; color: #9ca3af;">rocket_launch</span></div>

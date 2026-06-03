@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -20,9 +20,9 @@ import { PageHeaderComponent } from '@shared/components/page-header/page-header.
 })
 export class ProjectForm implements OnInit {
   projectForm!: FormGroup;
-  isLoading = false;
-  isLoadingProject = false;
-  errorMessage = '';
+  isLoading = signal(false);
+  isLoadingProject = signal(false);
+  errorMessage = signal('');
   projectId: string | null = null;
 
   get isEditMode(): boolean {
@@ -34,7 +34,6 @@ export class ProjectForm implements OnInit {
     private projectsService: ProjectsService,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -54,7 +53,7 @@ export class ProjectForm implements OnInit {
   }
 
   loadProject() {
-    this.isLoadingProject = true;
+    this.isLoadingProject.set(true);
 
     this.projectsService.getOne(this.projectId!).subscribe({
       next: (response) => {
@@ -63,13 +62,11 @@ export class ProjectForm implements OnInit {
           name: p.name,
           description: p.description || '',
         });
-        this.isLoadingProject = false;
-        this.cdr.detectChanges();
+        this.isLoadingProject.set(false);
       },
       error: () => {
-        this.errorMessage = 'Failed to load project.';
-        this.isLoadingProject = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load project.');
+        this.isLoadingProject.set(false);
       }
     });
   }
@@ -84,8 +81,8 @@ export class ProjectForm implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     const payload = this.projectForm.value;
     const request$ = this.isEditMode
@@ -98,9 +95,8 @@ export class ProjectForm implements OnInit {
         this.router.navigate(['/projects', id]);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to save project.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set(err.error?.message || 'Failed to save project.');
+        this.isLoading.set(false);
       }
     });
   }

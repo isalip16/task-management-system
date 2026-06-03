@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProjectsService } from '@core/services/projects.service';
@@ -21,42 +21,40 @@ import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skel
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard implements OnInit {
-  stats: DashboardStats | null = null;
-  currentUser: User | null = null;
-  isLoading = true;
-  errorMessage = '';
+  stats = signal<DashboardStats | null>(null);
+  currentUser = signal<User | null>(null);
+  isLoading = signal(true);
+  errorMessage = signal('');
+
+  completionPercentage = computed(() => {
+    const currentStats = this.stats();
+    if (!currentStats || currentStats.tasks.total === 0) {
+      return 0;
+    }
+    return Math.round((currentStats.tasks.DONE / currentStats.tasks.total) * 100);
+  });
 
   constructor(
     private projectsService: ProjectsService,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
-    this.currentUser = this.authService.getCurrentUser();
+    this.currentUser.set(this.authService.getCurrentUser());
     this.loadStats();
   }
 
   loadStats() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.projectsService.getDashboardStats().subscribe({
       next: (response) => {
-        this.stats = response.data;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.stats.set(response.data);
+        this.isLoading.set(false);
       },
-      error: (error) => {
-        this.errorMessage = 'Failed to load dashboard stats. Please try again later.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+      error: () => {
+        this.errorMessage.set('Failed to load dashboard stats. Please try again later.');
+        this.isLoading.set(false);
       },
     });
-  }
-
-  get completionPercentage(): number {
-    if (!this.stats || this.stats.tasks.total === 0) {
-      return 0;
-    }
-    return Math.round((this.stats.tasks.DONE / this.stats.tasks.total) * 100);
   }
 }

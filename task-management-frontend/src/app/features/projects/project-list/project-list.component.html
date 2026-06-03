@@ -3,7 +3,7 @@
   <!-- Shared Page Header -->
   <app-page-header 
     title="Projects" 
-    [subtitle]="totalProjects + ' project' + (totalProjects !== 1 ? 's' : '') + ' total'">
+    [subtitle]="totalProjects() + ' project' + (totalProjects() !== 1 ? 's' : '') + ' total'">
     <a routerLink="/projects/new" class="btn-primary">
       New Project
     </a>
@@ -31,22 +31,22 @@
   </div>
 
   <!-- Loading State -->
-  @if (isLoading) {
+  @if (isLoading()) {
     <app-skeleton-loader type="card" [count]="6"></app-skeleton-loader>
   }
 
   <!-- Error State -->
-  @if (errorMessage && !isLoading) {
+  @if (errorMessage() && !isLoading()) {
     <div class="alert-error">
-      <span>{{ errorMessage }}</span>
+      <span>{{ errorMessage() }}</span>
     </div>
   }
 
   <!-- Projects Grid -->
-  @if (!isLoading && !errorMessage) {
-    @if (projects.length > 0) {
+  @if (!isLoading() && !errorMessage()) {
+    @if (projects().length > 0) {
       <div class="projects-grid">
-        @for (project of projects; track project._id) {
+        @for (project of projects(); track project._id) {
           <div class="project-card">
             
             <div class="card-header">
@@ -95,13 +95,13 @@
       </div>
 
       <!-- Pagination -->
-      @if (totalPages > 1) {
+      @if (totalPages() > 1) {
         <div class="pagination-container">
-          <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" class="btn-pagination">
+          <button [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" class="btn-pagination">
             ◀
           </button>
-          <span class="pagination-info">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
-          <button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" class="btn-pagination">
+          <span class="pagination-info">Page <strong>{{ currentPage() }}</strong> of {{ totalPages() }}</span>
+          <button [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" class="btn-pagination">
             ▶
           </button>
         </div>

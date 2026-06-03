@@ -1,19 +1,19 @@
 <div class="project-detail-container">
-  @if (errorMessage && !isLoading) {
+  @if (errorMessage() && !isLoading()) {
   <div class="alert-error">
-    <span>{{ errorMessage }}</span>
+    <span>{{ errorMessage() }}</span>
   </div>
   }
 
-  @if (project && !isLoading) {
+  @if (project() && !isLoading()) {
 
   <!-- Page Header -->
-  <app-page-header [title]="project.name" [subtitle]="project.description || 'No description provided.'">
+  <app-page-header [title]="project()!.name" [subtitle]="project()!.description || 'No description provided.'">
     <div class="header-actions">
       <a routerLink="/projects" class="btn-secondary btn-back">
         All Workspaces
       </a>
-      @if (isOwner || isAdmin) {
+      @if (isOwner() || isAdmin()) {
       <a [routerLink]="['/projects', projectId, 'edit']" class="btn-secondary">
         Edit
       </a>
@@ -31,7 +31,7 @@
         <span class="material-icons info-icon">person</span>
         <div class="info-details">
           <span class="info-label">Project Owner</span>
-          <span class="info-value">{{ project.owner.name }}</span>
+          <span class="info-value">{{ project()!.owner.name }}</span>
         </div>
       </div>
     </div>
@@ -41,7 +41,7 @@
         <span class="material-icons info-icon">group</span>
         <div class="info-details">
           <span class="info-label">Members</span>
-          <span class="info-value">{{ project.members.length }}</span>
+          <span class="info-value">{{ project()!.members.length }}</span>
         </div>
       </div>
     </div>
@@ -51,7 +51,7 @@
         <span class="material-icons info-icon">assignment</span>
         <div class="info-details">
           <span class="info-label">Total Tasks</span>
-          <span class="info-value">{{ tasks.length }}</span>
+          <span class="info-value">{{ tasks().length }}</span>
         </div>
       </div>
     </div>
@@ -61,7 +61,7 @@
         <span class="material-icons info-icon">event</span>
         <div class="info-details">
           <span class="info-label">Created On</span>
-          <span class="info-value">{{ project.createdAt | date: 'MMM d, y' }}</span>
+          <span class="info-value">{{ project()!.createdAt | date: 'MMM d, y' }}</span>
         </div>
       </div>
     </div>
@@ -76,14 +76,14 @@
   </div>
 
   <!-- Loading Tasks -->
-  @if (isLoadingTasks) {
+  @if (isLoadingTasks()) {
   <div style="margin-top: 16px;">
     <app-skeleton-loader type="list" [count]="3"></app-skeleton-loader>
   </div>
   }
 
   <!-- Kanban Board -->
-  @if (!isLoadingTasks) {
+  @if (!isLoadingTasks()) {
   <div class="kanban-board">
 
     <!-- TODO Column -->
@@ -235,7 +235,7 @@
     <h2>Activity Log</h2>
   </div>
 
-  @if (isLoadingLogs) {
+  @if (isLoadingLogs()) {
     <div class="log-skeleton-wrap">
       @for (i of [1,2,3]; track i) {
         <div class="log-skeleton"></div>
@@ -243,10 +243,10 @@
     </div>
   }
 
-  @if (!isLoadingLogs) {
-    @if (activityLogs.length > 0) {
+  @if (!isLoadingLogs()) {
+    @if (activityLogs().length > 0) {
       <div class="activity-log">
-        @for (log of activityLogs; track log._id) {
+        @for (log of activityLogs(); track log._id) {
           <div class="log-entry">
 
             <!-- Icon -->
@@ -285,7 +285,7 @@
         }
 
         <!-- Load more -->
-        @if (logsPage < totalLogPages) {
+        @if (logsPage() < totalLogPages()) {
           <button class="btn-load-more" (click)="loadMoreLogs()">
             Load more activity
           </button>

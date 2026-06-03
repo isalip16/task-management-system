@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { ProjectsService } from '@core/services/projects.service';
@@ -22,20 +22,34 @@ import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skel
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetail implements OnInit {
-  project: Project | null = null;
-  tasks: Task[] = [];
-  currentUser: User | null = null;
-  isLoading = true;
-  isLoadingTasks = true;
-  errorMessage = '';
+  project = signal<Project | null>(null);
+  tasks = signal<Task[]>([]);
+  currentUser = signal<User | null>(null);
+  isLoading = signal(true);
+  isLoadingTasks = signal(true);
+  errorMessage = signal('');
 
-  activityLogs: ActivityLog[] = [];
-  isLoadingLogs = true;
-  logsPage = 1;
-  totalLogPages = 1;
+  activityLogs = signal<ActivityLog[]>([]);
+  isLoadingLogs = signal(true);
+  logsPage = signal(1);
+  totalLogPages = signal(1);
   projectId = '';
 
   TaskStatus = TaskStatus;
+
+  isOwner = computed(() => {
+    const proj = this.project();
+    const user = this.currentUser();
+    if (!proj || !user) return false;
+    const ownerId = typeof proj.owner === 'object'
+      ? proj.owner._id
+      : proj.owner;
+    return ownerId === user._id;
+  });
+
+  isAdmin = computed(() => {
+    return this.currentUser()?.role === 'admin';
+  });
 
   constructor(
     private projectsService: ProjectsService,
@@ -43,11 +57,10 @@ export class ProjectDetail implements OnInit {
     private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit() {
-    this.currentUser = this.authService.getCurrentUser();
+    this.currentUser.set(this.authService.getCurrentUser());
     this.projectId = this.route.snapshot.paramMap.get('id')!;
     this.loadProject();
     this.loadTasks();
@@ -55,64 +68,55 @@ export class ProjectDetail implements OnInit {
   }
 
   loadProject() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.projectsService.getOne(this.projectId).subscribe({
       next: (response) => {
-        this.project = response.data;
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.project.set(response.data);
+        this.isLoading.set(false);
       },
       error: () => {
-        this.errorMessage = 'Failed to load project.';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Failed to load project.');
+        this.isLoading.set(false);
       }
     });
   }
 
   loadTasks() {
-    this.isLoadingTasks = true;
+    this.isLoadingTasks.set(true);
     this.tasksService.getByProject(this.projectId).subscribe({
       next: (response) => {
-        this.tasks = response.data.tasks;
-        this.isLoadingTasks = false;
-        this.cdr.detectChanges();
+        this.tasks.set(response.data.tasks);
+        this.isLoadingTasks.set(false);
       },
       error: () => { 
-        this.isLoadingTasks = false;
-        this.cdr.detectChanges();
+        this.isLoadingTasks.set(false);
       }
     });
   }
 
   loadActivityLogs() {
-    this.isLoadingLogs = true;
-    this.tasksService.getActivityLogs(this.projectId, this.logsPage).subscribe({
+    this.isLoadingLogs.set(true);
+    this.tasksService.getActivityLogs(this.projectId, this.logsPage()).subscribe({
       next: (response) => {
-        this.activityLogs = response.data.logs;
-        this.totalLogPages = response.data.pagination.totalPages;
-        this.isLoadingLogs = false;
-        this.cdr.detectChanges();
+        this.activityLogs.set(response.data.logs);
+        this.totalLogPages.set(response.data.pagination.totalPages);
+        this.isLoadingLogs.set(false);
       },
       error: () => {
-        this.isLoadingLogs = false;
-        this.cdr.detectChanges();
+        this.isLoadingLogs.set(false);
       }
     });
   }
 
   loadMoreLogs() {
-    if(this.logsPage>= this.totalLogPages) return;
-    this.logsPage++;
-    this.tasksService.getActivityLogs(this.projectId, this.logsPage).subscribe({
+    if(this.logsPage() >= this.totalLogPages()) return;
+    this.logsPage.update(p => p + 1);
+    this.tasksService.getActivityLogs(this.projectId, this.logsPage()).subscribe({
       next: (response) => {
-        this.activityLogs = [...this.activityLogs, ...response.data.logs];
-        this.totalLogPages = response.data.pagination.totalPages;
-        this.cdr.detectChanges();
+        this.activityLogs.update(logs => [...logs, ...response.data.logs]);
+        this.totalLogPages.set(response.data.pagination.totalPages);
       },
-      error: () => {
-        this.cdr.detectChanges();
-      }
+      error: () => {}
     });
   }
 
@@ -126,19 +130,7 @@ export class ProjectDetail implements OnInit {
   }
 
   getTasksByStatus(status: TaskStatus): Task[] {
-    return this.tasks.filter(t => t.status === status);
-  }
-
-  get isOwner(): boolean {
-    if (!this.project || !this.currentUser) return false;
-    const ownerId = typeof this.project.owner === 'object'
-      ? this.project.owner._id
-      : this.project.owner;
-    return ownerId === this.currentUser._id;
-  }
-
-  get isAdmin(): boolean {
-    return this.currentUser?.role === 'admin';
+    return this.tasks().filter(t => t.status === status);
   }
 
   deleteProject() {
