@@ -67,6 +67,64 @@
     </div>
   </div>
 
+  <!-- Project Members Panel -->
+  <div class="members-section">
+    <div class="section-header-inline">
+      <h2>Project Members</h2>
+    </div>
+    
+    <div class="members-card">
+      <div class="members-grid" [class.no-add-pane]="!(isOwner() || isAdmin())">
+        <div class="members-list">
+          @for (member of project()!.members; track member._id) {
+            <div class="member-item">
+              <div class="member-avatar">
+                {{ member.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="member-info">
+                <span class="member-name">{{ member.name }}</span>
+                <span class="member-email">{{ member.email }}</span>
+              </div>
+              
+              <div class="member-actions">
+                @if (member._id === project()!.owner._id) {
+                  <span class="owner-badge">Owner</span>
+                } @else if (isOwner() || isAdmin()) {
+                  <button class="btn-remove-member" (click)="removeMember(member._id)" title="Remove Member">
+                    <span class="material-icons">person_remove</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Add Member Form (Visible only to Project Owner / Admin) -->
+        @if (isOwner() || isAdmin()) {
+          <div class="add-member-pane">
+            <h3>Add New Member</h3>
+            <p class="pane-subtitle">Search and add a user to this workspace.</p>
+            <div class="add-member-form">
+              <select [(ngModel)]="selectedUserIdToAdd" class="form-control select-member">
+                <option value="" disabled selected>Select a user to add...</option>
+                @for (user of availableUsersToAdd(); track user._id) {
+                  <option [value]="user._id">{{ user.name }} ({{ user.email }})</option>
+                }
+              </select>
+              <button class="btn-primary btn-add-member" (click)="addMember()" [disabled]="!selectedUserIdToAdd">
+                <span class="material-icons">person_add</span>
+                Add Member
+              </button>
+            </div>
+            @if (availableUsersToAdd().length === 0) {
+              <p class="no-users-available">All system users are already members of this project.</p>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
   <!-- Section Header for Kanban Board -->
   <div class="section-header">
     <h2>Task Board</h2>
