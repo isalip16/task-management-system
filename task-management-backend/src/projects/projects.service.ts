@@ -80,11 +80,69 @@ export class ProjectsService {
   }
 
   async findOne(id: string) {
-    const project = await this.projectModel
-      .findOne({ _id: id, isDeleted: false })
-      .populate("owner", "name email")
-      .populate("members", "name email");
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException("Invalid project ID format");
+    }
 
+    const projects = await this.projectModel.aggregate([
+      {
+        $match: {
+          _id: new Types.ObjectId(id),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+      {
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "members",
+          foreignField: "_id",
+          as: "members",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          status: 1,
+          isDeleted: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          owner: {
+            _id: 1,
+            name: 1,
+            email: 1,
+          },
+          members: {
+            $map: {
+              input: "$members",
+              as: "member",
+              in: {
+                _id: "$$member._id",
+                name: "$$member.name",
+                email: "$$member.email",
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    const project = projects[0] as Project | undefined;
     if (!project) throw new NotFoundException("Project not found");
 
     return { data: project };
