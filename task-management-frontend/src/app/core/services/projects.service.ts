@@ -48,4 +48,8 @@ export class ProjectsService {
   addMember(projectId: string, userId: string): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/${projectId}/members`, { userId });
   }
+
+  removeMember(projectId: string, memberId: string): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${projectId}/members/${memberId}`);
+  }
 }
