@@ -28,7 +28,7 @@
   <div class="info-row">
     <div class="info-card">
       <div class="info-content">
-        <span class="material-icons info-icon">person</span>
+        <span class="pi pi-user info-icon"></span>
         <div class="info-details">
           <span class="info-label">Project Owner</span>
           <span class="info-value">{{ project()!.owner.name }}</span>
@@ -38,7 +38,7 @@
 
     <div class="info-card">
       <div class="info-content">
-        <span class="material-icons info-icon">group</span>
+        <span class="pi pi-users info-icon"></span>
         <div class="info-details">
           <span class="info-label">Members</span>
           <span class="info-value">{{ project()!.members.length }}</span>
@@ -48,7 +48,7 @@
 
     <div class="info-card">
       <div class="info-content">
-        <span class="material-icons info-icon">assignment</span>
+        <span class="pi pi-list info-icon"></span>
         <div class="info-details">
           <span class="info-label">Total Tasks</span>
           <span class="info-value">{{ tasks().length }}</span>
@@ -58,7 +58,7 @@
 
     <div class="info-card">
       <div class="info-content">
-        <span class="material-icons info-icon">event</span>
+        <span class="pi pi-calendar info-icon"></span>
         <div class="info-details">
           <span class="info-label">Created On</span>
           <span class="info-value">{{ project()!.createdAt | date: 'MMM d, y' }}</span>
@@ -91,7 +91,7 @@
                   <span class="owner-badge">Owner</span>
                 } @else if (isOwner() || isAdmin()) {
                   <button class="btn-remove-member" (click)="removeMember(member._id)" title="Remove Member">
-                    <span class="material-icons">person_remove</span>
+                    <span class="pi pi-user-minus"></span>
                   </button>
                 }
               </div>
@@ -112,7 +112,7 @@
                 }
               </select>
               <button class="btn-primary btn-add-member" (click)="addMember()" [disabled]="!selectedUserIdToAdd">
-                <span class="material-icons">person_add</span>
+                <span class="pi pi-user-plus"></span>
                 Add Member
               </button>
             </div>
@@ -160,7 +160,7 @@
             </span>
             @if (task.dueDate) {
             <span class="due-badge">
-              <span class="material-icons icon-inline">event</span>{{ task.dueDate | date: 'MMM d' }}
+              <span class="pi pi-calendar icon-inline"></span>{{ task.dueDate | date: 'MMM d' }}
             </span>
             }
           </div>
@@ -176,7 +176,7 @@
             </div>
             } @else {
             <div class="unassigned-avatar" title="Unassigned" style="display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons" style="font-size: 16px;">person</span>
+              <span class="pi pi-user" style="font-size: 14px;"></span>
             </div>
             }
           </div>
@@ -207,7 +207,7 @@
             </span>
             @if (task.dueDate) {
             <span class="due-badge">
-              <span class="material-icons icon-inline">event</span>{{ task.dueDate | date: 'MMM d' }}
+              <span class="pi pi-calendar icon-inline"></span>{{ task.dueDate | date: 'MMM d' }}
             </span>
             }
           </div>
@@ -223,7 +223,7 @@
             </div>
             } @else {
             <div class="unassigned-avatar" title="Unassigned" style="display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons" style="font-size: 16px;">person</span>
+              <span class="pi pi-user" style="font-size: 14px;"></span>
             </div>
             }
           </div>
@@ -254,7 +254,7 @@
             </span>
             @if (task.dueDate) {
             <span class="due-badge">
-              <span class="material-icons icon-inline">event</span>{{ task.dueDate | date: 'MMM d' }}
+              <span class="pi pi-calendar icon-inline"></span>{{ task.dueDate | date: 'MMM d' }}
             </span>
             }
           </div>
@@ -270,7 +270,7 @@
             </div>
             } @else {
             <div class="unassigned-avatar" title="Unassigned" style="display: flex; align-items: center; justify-content: center;">
-              <span class="material-icons" style="font-size: 16px;">person</span>
+              <span class="pi pi-user" style="font-size: 14px;"></span>
             </div>
             }
           </div>
@@ -308,7 +308,7 @@
           <div class="log-entry">
 
             <!-- Icon -->
-            <div class="log-icon"><span class="material-icons">{{ getLogIcon(log.toStatus) }}</span></div>
+            <div class="log-icon"><span class="pi" [ngClass]="getLogIcon(log.toStatus)"></span></div>
 
             <!-- Content -->
             <div class="log-content">

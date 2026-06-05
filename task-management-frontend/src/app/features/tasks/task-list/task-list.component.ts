@@ -156,6 +156,14 @@ export class TaskList implements OnInit {
     });
   }
 
+  onStatusSelect(task: Task, event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const newStatus = select.value as TaskStatus;
+    if (newStatus !== task.status) {
+      this.updateStatus(task, newStatus);
+    }
+  }
+
   deleteTask(task: Task) {
     if (!confirm(`Delete "${task.title}"? This cannot be undone.`)) return;
 
