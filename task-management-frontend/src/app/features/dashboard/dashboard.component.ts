@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProjectsService } from '@core/services/projects.service';
 import { AuthService } from '@core/services/auth.service';
-import { DashboardStats, User } from '@core/models';
+import { TasksService } from '@core/services/tasks.service';
+import { DashboardStats, User, Project, Task } from '@core/models';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { SkeletonLoaderComponent } from '@shared/components/skeleton-loader/skeleton-loader.component';
 
@@ -24,6 +25,10 @@ export class Dashboard implements OnInit {
   stats = signal<DashboardStats | null>(null);
   currentUser = signal<User | null>(null);
   isLoading = signal(true);
+  recentProjects = signal<Project[]>([]);
+  isLoadingProjects = signal(true);
+  myTasks = signal<Task[]>([]);
+  isLoadingTasks = signal(true);
   errorMessage = signal('');
 
   completionPercentage = computed(() => {
@@ -36,12 +41,18 @@ export class Dashboard implements OnInit {
 
   constructor(
     private projectsService: ProjectsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private tasksService: TasksService
   ) {}
 
   ngOnInit() {
-    this.currentUser.set(this.authService.getCurrentUser());
+    const user = this.authService.getCurrentUser();
+    this.currentUser.set(user);
     this.loadStats();
+    this.loadRecentProjects();
+    if (user) {
+      this.loadMyTasks(user._id);
+    }
   }
 
   loadStats() {
@@ -56,5 +67,38 @@ export class Dashboard implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  loadRecentProjects() {
+    this.isLoadingProjects.set(true);
+    this.projectsService.getAll({ limit: 3 }).subscribe({
+      next: (response) => {
+        this.recentProjects.set(response.data.projects);
+        this.isLoadingProjects.set(false);
+      },
+      error: () => {
+        this.isLoadingProjects.set(false);
+      }
+    });
+  }
+
+  loadMyTasks(userId: string) {
+    this.isLoadingTasks.set(true);
+    this.tasksService.getAll({ assignedTo: userId, limit: 5 }).subscribe({
+      next: (response) => {
+        this.myTasks.set(response.data.tasks);
+        this.isLoadingTasks.set(false);
+      },
+      error: () => {
+        this.isLoadingTasks.set(false);
+      }
+    });
+  }
+
+  getProjectName(task: Task): string {
+    if (typeof task.project === 'object' && task.project !== null) {
+      return (task.project as any).name;
+    }
+    return '';
   }
 }

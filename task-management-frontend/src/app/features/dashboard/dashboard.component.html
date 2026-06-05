@@ -24,7 +24,7 @@
 
     <div class="stat-card stat-projects">
       <div class="stat-content">
-        <div class="stat-icon-wrapper"><span class="material-icons">folder</span></div>
+        <div class="stat-icon-wrapper"><span class="pi pi-folder"></span></div>
         <div class="stat-details">
           <span class="stat-value">{{ stats()?.totalProjects }}</span>
           <span class="stat-label">Total Projects</span>
@@ -34,7 +34,7 @@
 
     <div class="stat-card stat-tasks">
       <div class="stat-content">
-        <div class="stat-icon-wrapper"><span class="material-icons">assignment</span></div>
+        <div class="stat-icon-wrapper"><span class="pi pi-list"></span></div>
         <div class="stat-details">
           <span class="stat-value">{{ stats()?.tasks?.total }}</span>
           <span class="stat-label">Total Tasks</span>
@@ -44,7 +44,7 @@
 
     <div class="stat-card stat-progress">
       <div class="stat-content">
-        <div class="stat-icon-wrapper"><span class="material-icons">flash_on</span></div>
+        <div class="stat-icon-wrapper"><span class="pi pi-bolt"></span></div>
         <div class="stat-details">
           <span class="stat-value">{{ stats()?.tasks?.IN_PROGRESS }}</span>
           <span class="stat-label">In Progress</span>
@@ -54,7 +54,7 @@
 
     <div class="stat-card stat-done">
       <div class="stat-content">
-        <div class="stat-icon-wrapper"><span class="material-icons">check</span></div>
+        <div class="stat-icon-wrapper"><span class="pi pi-check"></span></div>
         <div class="stat-details">
           <span class="stat-value">{{ stats()?.tasks?.DONE }}</span>
           <span class="stat-label">Completed</span>
@@ -64,72 +64,152 @@
 
   </div>
 
-  <!-- Task Breakdown Card -->
-  <div class="breakdown-card">
-    <h3 class="section-title">Task Progress Overview</h3>
-    <div class="breakdown-content">
-
-      <div class="breakdown-row">
-        <div class="breakdown-info">
-          <span class="status-indicator status-todo"></span>
-          <span class="breakdown-label">To Do</span>
-          <span class="breakdown-count">{{ stats()?.tasks?.TODO }}</span>
-        </div>
-        <div class="progress-bar-container">
-          <div class="progress-bar progress-todo"
-            [style.width.%]="stats()!.tasks.total > 0 ? (stats()!.tasks.TODO / stats()!.tasks.total) * 100 : 0"></div>
-        </div>
+  <!-- Task Progress Overview Card -->
+  <div class="progress-overview-card">
+    <div class="overview-header">
+      <div class="title-section">
+        <h3>Task Progress</h3>
+        <p class="subtitle">Status distribution of all workspace tasks</p>
       </div>
-
-      <div class="breakdown-row">
-        <div class="breakdown-info">
-          <span class="status-indicator status-inprogress"></span>
-          <span class="breakdown-label">In Progress</span>
-          <span class="breakdown-count">{{ stats()?.tasks?.IN_PROGRESS }}</span>
-        </div>
-        <div class="progress-bar-container">
-          <div class="progress-bar progress-inprogress"
-            [style.width.%]="stats()!.tasks.total > 0 ? (stats()!.tasks.IN_PROGRESS / stats()!.tasks.total) * 100 : 0">
-          </div>
-        </div>
+      <div class="completion-badge">
+        <span class="percentage">{{ completionPercentage() }}%</span>
+        <span class="label">Completed</span>
       </div>
+    </div>
 
-      <div class="breakdown-row">
-        <div class="breakdown-info">
-          <span class="status-indicator status-done"></span>
-          <span class="breakdown-label">Completed</span>
-          <span class="breakdown-count">{{ stats()?.tasks?.DONE }}</span>
-        </div>
-        <div class="progress-bar-container">
-          <div class="progress-bar progress-done" [style.width.%]="completionPercentage()"></div>
-        </div>
+    <!-- Stacked Progress Bar -->
+    <div class="progress-stacked-bar">
+      @if (stats()!.tasks.total > 0) {
+        <div class="progress-segment segment-todo" 
+          [style.width.%]="(stats()!.tasks.TODO / stats()!.tasks.total) * 100" 
+          title="To Do: {{ stats()?.tasks?.TODO }} tasks"></div>
+        <div class="progress-segment segment-inprogress" 
+          [style.width.%]="(stats()!.tasks.IN_PROGRESS / stats()!.tasks.total) * 100" 
+          title="In Progress: {{ stats()?.tasks?.IN_PROGRESS }} tasks"></div>
+        <div class="progress-segment segment-done" 
+          [style.width.%]="(stats()!.tasks.DONE / stats()!.tasks.total) * 100" 
+          title="Completed: {{ stats()?.tasks?.DONE }} tasks"></div>
+      } @else {
+        <div class="progress-segment-empty" style="width: 100%;" title="No tasks"></div>
+      }
+    </div>
+
+    <!-- Clean Legend -->
+    <div class="progress-legend">
+      <div class="legend-item">
+        <span class="legend-dot status-todo"></span>
+        <span class="legend-label">To Do</span>
+        <span class="legend-count">{{ stats()?.tasks?.TODO }}</span>
       </div>
-
-      <div class="divider"></div>
-
-      <div class="overall-completion">
-        <span class="completion-text">Overall Project Completion</span>
-        <span class="completion-percentage">{{ completionPercentage() }}%</span>
+      <div class="legend-item">
+        <span class="legend-dot status-inprogress"></span>
+        <span class="legend-label">In Progress</span>
+        <span class="legend-count">{{ stats()?.tasks?.IN_PROGRESS }}</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot status-done"></span>
+        <span class="legend-label">Completed</span>
+        <span class="legend-count">{{ stats()?.tasks?.DONE }}</span>
       </div>
     </div>
   </div>
 
-  <!-- Quick Actions Card -->
-  <div class="quick-actions-section">
-    <h3 class="section-title-sub">Quick Actions</h3>
-    <div class="quick-actions-grid">
-      <a routerLink="/projects" class="btn-secondary">
-        View All Projects
-      </a>
+  <!-- Recent Workspaces / Projects -->
+  @if (recentProjects().length > 0) {
+    <div class="recent-projects-section">
+      <div class="section-header-inline">
+        <h3>Recent Workspaces</h3>
+        <a routerLink="/projects" class="view-all-link">
+          View all <span class="pi pi-arrow-right" style="font-size: 10px; margin-left: 4px;"></span>
+        </a>
+      </div>
+      
+      <div class="recent-projects-grid">
+        @for (project of recentProjects(); track project._id) {
+          <a [routerLink]="['/projects', project._id]" class="recent-project-card">
+            <div class="card-header">
+              <span class="project-badge status-{{ project.status }}">
+                {{ project.status }}
+              </span>
+            </div>
+            <h4 class="project-name">{{ project.name }}</h4>
+            <p class="project-desc">{{ project.description || 'No description provided.' }}</p>
+            
+            <div class="card-footer">
+              <div class="footer-item flex-owner">
+                <span class="pi pi-user icon-inline"></span>
+                <span class="value">{{ project.owner.name }}</span>
+              </div>
+              <div class="footer-item flex-members">
+                <span class="pi pi-users icon-inline"></span>
+                <span class="value">{{ project.members.length }}</span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
     </div>
+  }
+
+  <!-- My Assigned Tasks Section -->
+  <div class="my-tasks-section">
+    <div class="section-header-inline">
+      <h3>My Tasks</h3>
+      @if (myTasks().length > 0) {
+        <span class="task-count-badge">
+          {{ myTasks().length }} Assigned
+        </span>
+      }
+    </div>
+
+    @if (isLoadingTasks()) {
+      <app-skeleton-loader type="list" [count]="2"></app-skeleton-loader>
+    } @else {
+      @if (myTasks().length > 0) {
+        <div class="my-tasks-list">
+          @for (task of myTasks(); track task._id) {
+            <a [routerLink]="['/tasks']" [queryParams]="{ id: task._id }" class="dashboard-task-item">
+              <div class="task-main-info">
+                <span class="task-title">{{ task.title }}</span>
+                @if (getProjectName(task)) {
+                  <span class="task-workspace">
+                    <span class="pi pi-folder icon-inline"></span>
+                    {{ getProjectName(task) }}
+                  </span>
+                }
+              </div>
+              <div class="task-meta-info">
+                <span class="badge status-badge status-{{ task.status }}">
+                  {{ task.status === 'IN_PROGRESS' ? 'In Progress' : task.status === 'TODO' ? 'To Do' : 'Done' }}
+                </span>
+                <span class="badge priority-badge priority-{{ task.priority }}">
+                  {{ task.priority }}
+                </span>
+                @if (task.dueDate) {
+                  <span class="task-due">
+                    <span class="pi pi-calendar icon-inline"></span>
+                    {{ task.dueDate | date: 'MMM d' }}
+                  </span>
+                }
+              </div>
+            </a>
+          }
+        </div>
+      } @else {
+        <div class="tasks-empty-state">
+          <span class="pi pi-check-circle empty-icon"></span>
+          <p>No tasks assigned to you. You're all caught up!</p>
+        </div>
+      }
+    }
   </div>
   }
 
   @if (stats() && stats()?.totalProjects === 0 && !isLoading()) {
   <div class="empty-state-card">
     <div class="empty-state-content">
-      <div class="empty-icon-wrapper"><span class="material-icons"
-          style="font-size: 48px; color: #9ca3af;">rocket_launch</span></div>
+      <div class="empty-icon-wrapper"><span class="pi pi-send"
+          style="font-size: 48px; color: #9ca3af;"></span></div>
       <h2>Welcome to TaskFlow!</h2>
       <p>You haven't created any projects yet. Create your first project to organize your workflows, add tasks, and
         track team progress.</p>

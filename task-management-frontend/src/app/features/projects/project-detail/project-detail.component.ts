@@ -173,11 +173,11 @@ export class ProjectDetail implements OnInit {
 
   getLogIcon(toStatus: string): string {
     const icons: Record<string, string> = {
-      [TaskStatus.TODO]: 'schedule',
-      [TaskStatus.IN_PROGRESS]: 'autorenew',
-      [TaskStatus.DONE]: 'check_circle'
+      [TaskStatus.TODO]: 'pi-clock',
+      [TaskStatus.IN_PROGRESS]: 'pi-refresh',
+      [TaskStatus.DONE]: 'pi-check-circle'
     };
-    return icons[toStatus] || 'help';
+    return icons[toStatus] || 'pi-question-circle';
   }
 
   getTasksByStatus(status: TaskStatus): Task[] {

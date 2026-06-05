@@ -1,8 +1,10 @@
+@import "primeicons/primeicons.css";
+
 :root {
   // Fonts
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-brand: 'Outfit', sans-serif;
-
+  
   // Modern Color Palette
   --primary-color: #4f46e5; // Indigo
   --primary-hover: #4338ca;
@@ -201,11 +203,11 @@ h6 {
   background-color: #e5e7eb;
 }
 
-// Material Icons inline alignment utility
-.material-icons {
+// Material Icons / PrimeIcons inline alignment utility
+.material-icons, .pi {
   &.icon-inline {
-    font-size: 16px;
-    vertical-align: -3px;
+    font-size: 14px;
+    vertical-align: -2px;
     margin-right: 4px;
   }
 }
@@ -480,7 +482,7 @@ h6 {
   align-items: center;
   justify-content: center;
 
-  .material-icons {
+  .material-icons, .pi {
     font-size: 18px;
     width: 18px;
     height: 18px;

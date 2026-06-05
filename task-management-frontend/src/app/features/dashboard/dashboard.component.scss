@@ -83,105 +83,287 @@
   }
 }
 
-// Breakdown Card
-.breakdown-card {
+// Progress Overview Card
+.progress-overview-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   padding: 24px;
-
-  .section-title {
-    font-family: var(--font-brand);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 20px;
-  }
-}
-
-.breakdown-content {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
+  }
 }
 
-.breakdown-row {
+.overview-header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.breakdown-info {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 8px;
-
-  &.status-todo { background-color: var(--status-todo-text); }
-  &.status-inprogress { background-color: #d97706; }
-  &.status-done { background-color: #16a34a; }
-}
-
-.breakdown-label {
-  color: var(--text-main);
-}
-
-.breakdown-count {
-  margin-left: auto;
-  font-weight: 700;
-  color: var(--text-main);
-  background-color: var(--bg-app);
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-}
-
-.progress-bar-container {
-  height: 6px;
-  background-color: #f3f4f6;
-  border-radius: 3px;
-  width: 100%;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  border-radius: 3px;
-
-  &.progress-todo { background-color: var(--status-todo-text); }
-  &.progress-inprogress { background-color: #d97706; }
-  &.progress-done { background-color: #16a34a; }
-}
-
-.breakdown-content .divider {
-  height: 1px;
-  background-color: var(--border-color);
-}
-
-.overall-completion {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 
-  .completion-text {
-    font-size: 14px;
-    font-weight: 600;
+  .title-section {
+    h3 {
+      font-family: var(--font-brand);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+  }
+
+  .completion-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .percentage {
+      font-family: var(--font-brand);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary-color);
+      line-height: 1;
+    }
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+  }
+}
+
+.progress-stacked-bar {
+  height: 12px;
+  background-color: #f1f5f9; // Slate 100
+  border-radius: 6px;
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.progress-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+
+  &.segment-todo {
+    background-color: #94a3b8; // Slate 400 (Clean neutral todo)
+  }
+
+  &.segment-inprogress {
+    background-color: #f59e0b; // Amber 500
+  }
+
+  &.segment-done {
+    background-color: #10b981; // Emerald 500
+  }
+}
+
+.progress-segment-empty {
+  height: 100%;
+  background-color: #e2e8f0; // Slate 200
+}
+
+.progress-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding-top: 4px;
+
+  @media (max-width: 480px) {
+    gap: 16px;
+  }
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+
+    &.status-todo {
+      background-color: #94a3b8;
+    }
+    &.status-inprogress {
+      background-color: #f59e0b;
+    }
+    &.status-done {
+      background-color: #10b981;
+    }
+  }
+
+  .legend-label {
     color: var(--text-muted);
   }
 
-  .completion-percentage {
+  .legend-count {
+    font-weight: 700;
+    color: var(--text-main);
+    background-color: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+  }
+}
+
+// Recent Workspaces / Projects Section
+.recent-projects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+
+  .section-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      font-family: var(--font-brand);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .view-all-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary-color);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: var(--primary-hover);
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.recent-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.recent-project-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .project-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 12px;
+
+    &.status-active {
+      background-color: #dcfce7;
+      color: #15803d;
+    }
+
+    &.status-archived {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+  }
+
+  .project-name {
     font-family: var(--font-brand);
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--primary-color);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+  }
+
+  .project-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 38px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .footer-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+
+    &.flex-owner {
+      flex: 1;
+      min-width: 0;
+      
+      .value {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .icon-inline {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .value {
+      font-weight: 500;
+    }
   }
 }
 
@@ -248,5 +430,185 @@
 
   .btn-create-first {
     margin-top: 8px;
+  }
+}
+
+// My Tasks Section
+.my-tasks-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+
+  .section-header-inline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    h3 {
+      font-family: var(--font-brand);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .task-count-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary-color);
+      background-color: var(--primary-light);
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+  }
+}
+
+.my-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-task-item {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+.task-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .task-workspace {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .icon-inline {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  }
+}
+
+.task-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    justify-content: flex-start;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
+  }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+
+  .status-badge {
+    &.status-TODO {
+      background-color: #f1f5f9;
+      color: #475569;
+    }
+    &.status-IN_PROGRESS {
+      background-color: #fffbeb;
+      color: #d97706;
+    }
+    &.status-DONE {
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+  }
+
+  .priority-badge {
+    &.priority-low {
+      background-color: #f1f5f9;
+      color: #64748b;
+    }
+    &.priority-medium {
+      background-color: #eff6ff;
+      color: #2563eb;
+    }
+    &.priority-high {
+      background-color: #fef2f2;
+      color: #dc2626;
+    }
+  }
+
+  .task-due {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .icon-inline {
+      font-size: 12px;
+    }
+  }
+}
+
+.tasks-empty-state {
+  background-color: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--text-muted);
+
+  .empty-icon {
+    font-size: 32px;
+    color: #10b981;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
   }
 }

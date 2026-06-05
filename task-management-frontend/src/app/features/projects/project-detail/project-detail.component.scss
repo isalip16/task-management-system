@@ -414,7 +414,12 @@
       background-color: #fef2f2;
     }
 
-    .material-icons {
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .material-icons, .pi {
       font-size: 20px;
     }
   }
@@ -476,7 +481,7 @@
       border-radius: 8px;
       cursor: pointer;
 
-      .material-icons {
+      .material-icons, .pi {
         font-size: 18px;
       }
 
